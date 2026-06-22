@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>SIK - Control Central</title>
+    <style>
+        /* --- ESTÉTICA CYBER-EXECUTIVE NOIR --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            padding: 20px 16px;
+            padding-bottom: 120px;
+            letter-spacing: -0.2px;
+        }
+
+        /* --- CONTENEDOR SUPERIOR DE CONTROL --- */
+        .top-navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .brand-title {
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: #ffffff;
+        }
+
+        /* --- BOTÓN HAMBURGUESA FLOTANTE --- */
+        .hamburger-btn {
+            background: rgba(28, 28, 30, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        .hamburger-btn span {
+            width: 18px;
+            height: 2px;
+            background-color: #ffffff;
+            border-radius: 2px;
+            transition: all 0.2s ease;
+        }
+
+        /* --- PANEL LATERAL DESPLEGABLE (MENU OVERLAY) --- */
+        .side-menu-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 300;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+        .side-menu-overlay.open { opacity: 1; pointer-events: auto; }
+        
+        .side-menu-content {
+            position: fixed;
+            top: 0; left: 0; bottom: 0;
+            width: 280px;
+            background: #0d0d0e;
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 24px 18px;
+            transform: translateX(-100%);
+            transition: transform 0.25s cubic-bezier(0.15, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+        .side-menu-overlay.open .side-menu-content { transform: translateX(0); }
+        
+        .menu-brand-header {
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .menu-brand-header h3 { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
+        .menu-brand-header .close-menu-btn {
+            background: transparent; border: 0; color: #ff453a; font-size: 22px; cursor: pointer;
+        }
+
+        .menu-links-list {
+            display: flex; flex-direction: column; gap: 8px; list-style: none;
+        }
+        .menu-links-list a {
+            display: flex; align-items: center; gap: 14px; color: #e5e5ea;
+            text-decoration: none; padding: 12px 14px; border-radius: 10px;
+            font-size: 15px; font-weight: 600; transition: background 0.2s;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.02);
+        }
+        .menu-links-list a:active {
+            background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.1);
+        }
+        .menu-icon-span { font-size: 18px; }
+
+        /* --- DASHBOARD DE OBJETIVOS DIARIOS --- */
+        .metrics-header {
+            background: linear-gradient(135deg, rgba(20, 20, 25, 0.8) 0%, rgba(10, 10, 12, 0.6) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 20px;
+            padding: 22px 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        
+        .focus-row {
+            display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 6px;
+        }
+        .metrics-header .label {
+            font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #8e8e93; font-weight: 700;
+        }
+        .tx-counter-badge {
+            font-size: 12px; font-weight: 700; background: rgba(255, 255, 255, 0.1);
+            padding: 3px 8px; border-radius: 6px; color: #ffffff; letter-spacing: 0.5px;
+        }
+        .tx-counter-badge span { color: #64d2ff; }
+        .metrics-header .total-revenue {
+            font-size: 42px; font-weight: 800; color: #ff453a; letter-spacing: -1.5px; text-shadow: 0 0 20px rgba(255, 69, 58, 0.15);
+        }
+        
+        .goal-progress-bar {
+            width: 100%; height: 4px; background: rgba(255, 255, 255, 0.08); border-radius: 2px; margin-top: 12px; overflow: hidden;
+        }
+        .goal-progress-fill {
+            height: 100%; width: 0%; background: linear-gradient(90deg, #ff453a, #30d158); transition: width 0.4s ease;
+        }
+
+        .sub-stats {
+            display: flex; gap: 28px; margin-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 14px;
+        }
+        .stat-box { flex: 1; }
+        .stat-box .num { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; }
+        .stat-box .num.earnings { color: #30d158; }
+        .stat-box .num.expected { color: #64d2ff; }
+        .stat-box .lbl {
+            font-size: 10.5px; color: #636366; margin-top: 3px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.3px;
+        }
+
+        /* --- MINI BUSCADOR REAL-TIME --- */
+        .search-container { margin-bottom: 12px; position: relative; }
+        .search-input-mini {
+            width: 100%; background-color: rgba(28, 28, 30, 0.5); border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 10px; padding: 8px 12px 8px 32px; color: #ffffff; font-size: 12px; font-weight: 500; outline: none;
+        }
+        .search-input-mini:focus { background-color: rgba(28, 28, 30, 0.9); border-color: rgba(255, 255, 255, 0.2); }
+        .search-icon-mini { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 12px; height: 12px; fill: #8e8e93; pointer-events: none; }
+
+        /* --- CONTROLES SEGMENTADOS --- */
+        .segmented-control {
+            background-color: rgba(28, 28, 30, 0.7); padding: 3px; border-radius: 12px; display: flex; margin-bottom: 22px; border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+        .segment-btn {
+            flex: 1; background: transparent; border: 0; color: #8e8e93; font-size: 12px; font-weight: 600; padding: 9px 0; border-radius: 9px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+        }
+        .segment-btn svg { width: 13px; height: 13px; fill: currentColor; }
+        .segment-btn.active { background-color: #ffffff; color: #000000; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+        .segment-counter { font-size: 10px; font-weight: 700; opacity: 0.7; }
+        .segment-btn.active .segment-counter { opacity: 0.9; }
+
+        /* --- CONTENEDOR DE TARJETAS --- */
+        .cards-container { display: flex; flex-direction: column; gap: 14px; }
+        .client-card {
+            background: linear-gradient(145deg, rgba(28, 28, 30, 0.7) 0%, rgba(18, 18, 20, 0.9) 100%); border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.06); padding: 16px; position: relative; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+        }
+        .client-card.expired-alert {
+            border: 1px solid rgba(255, 69, 58, 0.3); background: linear-gradient(145deg, rgba(28, 15, 15, 0.8) 0%, rgba(18, 10, 10, 0.9) 100%);
+        }
+        .card-top { display: flex; justify-content: space-between; align-items: flex-start; }
+        .card-user-info { display: flex; flex-direction: column; gap: 4px; }
+        .name-row { display: flex; align-items: center; gap: 8px; }
+        .phone-tag { color: #ffffff; font-size: 12px; font-weight: 700; font-family: monospace; background: rgba(255, 255, 255, 0.12); padding: 2px 6px; border-radius: 6px; }
+        .client-name { font-size: 16px; font-weight: 700; color: #ffffff; letter-spacing: -0.3px; }
+        .meta-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 2px; }
+        .mini-dni, .mini-phone-display { font-size: 10.5px; color: #a2a2a7; font-weight: 500; background: rgba(255, 255, 255, 0.05); padding: 2px 6px; border-radius: 4px; }
+        .mini-phone-display { color: #64d2ff; background: rgba(100, 210, 255, 0.06); font-family: monospace; }
+        
+        .mini-ig { font-size: 11px; color: #bf94ff; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 3px; background: rgba(191, 148, 255, 0.08); padding: 2px 6px; border-radius: 4px; }
+        .mini-ig svg { width: 10px; height: 10px; fill: currentColor; }
+        .mini-wsp { display: inline-flex; align-items: center; background: rgba(48, 209, 88, 0.08); color: #30d158; padding: 2px 5px; border-radius: 4px; }
+        .mini-wsp svg { width: 12px; height: 12px; fill: currentColor; }
+
+        .card-financial { text-align: right; }
+        .price-display { font-size: 20px; font-weight: 800; color: #ff453a; letter-spacing: -0.5px; }
+        .price-display.analisis { color: #ff9f0a; }
+        .price-display.paid { color: #30d158; text-shadow: 0 0 15px rgba(48, 209, 88, 0.1); }
+
+        .card-bottom-promise { background: rgba(255, 255, 255, 0.03); border-radius: 8px; padding: 6px 10px; font-size: 11px; color: #e5e5ea; font-weight: 500; display: flex; align-items: center; gap: 6px; border-left: 2px solid #bf94ff; }
+        .card-bottom-promise svg { width: 11px; height: 11px; fill: #bf94ff; flex-shrink: 0; }
+
+        .card-actions-bar { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 10px; margin-top: 4px; }
+        .status-select-premium { background: #1c1c1e; border: 1px solid rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 11.5px; font-weight: 600; padding: 6px 10px; border-radius: 8px; outline: none; }
+        .right-controls { display: flex; align-items: center; gap: 12px; }
+
+        .status-glow-dot { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+        .status-glow-dot svg { width: 14px; height: 14px; }
+        .status-glow-dot.deben { color: #ff453a; }
+        .status-glow-dot.deben svg { fill: #ff453a; }
+        .status-glow-dot.analisis { color: #ff9f0a; }
+        .status-glow-dot.analisis svg { fill: #ff9f0a; }
+        .status-glow-dot.pagado { color: #30d158; }
+        .status-glow-dot.pagado svg { fill: #30d158; }
+
+        .delete-card-btn { background: transparent; border: 0; color: rgba(255, 69, 58, 0.4); cursor: pointer; padding: 6px; display: flex; align-items: center; border-radius: 6px; }
+        .delete-card-btn svg { width: 14px; height: 14px; fill: currentColor; }
+
+        /* --- ACCIONES MODALES Y FLOATS --- */
+        .fab { position: fixed; bottom: 30px; right: 24px; background: #ffffff; color: #000000; border: none; width: 56px; height: 56px; border-radius: 18px; display: flex; justify-content: center; align-items: center; box-shadow: 0 8px 24px rgba(255, 255, 255, 0.2); z-index: 100; }
+        .modal { position: fixed; inset: 0; background-color: rgba(0,0,0,0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; align-items: flex-end; z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
+        .modal.open { opacity: 1; pointer-events: auto; }
+        .modal-content { width: 100%; background-color: #121214; border-top-left-radius: 24px; border-top-right-radius: 24px; border-top: 1px solid rgba(255, 255, 255, 0.1); padding: 24px 20px 44px 20px; transform: translateY(100%); transition: transform 0.25s cubic-bezier(0.15, 1, 0.3, 1); }
+        .modal.open .modal-content { transform: translateY(0); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .close-btn { background: transparent; border: 0; color: #ff453a; font-size: 15px; font-weight: 600; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 10px; color: #aeaeae; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+        .form-control { width: 100%; background-color: #1c1c1e; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 10px; padding: 12px 14px; color: #ffffff; font-size: 15px; outline: none; }
+        .form-row-double { display: flex; gap: 12px; }
+        .submit-btn { width: 100%; background-color: #ffffff; color: #000000; border: 0; padding: 14px; border-radius: 12px; font-size: 15px; font-weight: 700; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <!-- BARRA SUPERIOR CON HAMBURGUESA -->
+    <div class="top-navbar">
+        <button class="hamburger-btn" onclick="toggleSideMenu(true)">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="brand-title">SIK</div>
+        <div style="width: 42px;"></div> <!-- Balanceador estético -->
+    </div>
+
+    <!-- ESTRUCTURA DEL MENÚ DESPLEGABLE -->
+    <div class="side-menu-overlay" id="sideMenuOverlay" onclick="toggleSideMenu(false)">
+        <div class="side-menu-content" onclick="event.stopPropagation()">
+            <div class="menu-brand-header">
+                <h3>SIK</h3>
+                <button class="close-menu-btn" onclick="toggleSideMenu(false)">✕</button>
+            </div>
+            <nav class="menu-links-list" id="sideMenuLinksContainer"></nav>
+        </div>
+    </div>
+
+    <!-- CONTROL DIARIO DE OBJETIVOS -->
+    <div class="metrics-header">
+        <div class="focus-row">
+            <div class="label">Me puse en juego hoy</div>
+            <div class="tx-counter-badge" id="txCounter">Emitidas: <span id="txActiveCount">0</span></div>
+        </div>
+        <div class="total-revenue" id="todayPlaced">$0</div>
+        
+        <div class="goal-progress-bar">
+            <div class="goal-progress-fill" id="goalProgress"></div>
+        </div>
+        
+        <div class="sub-stats">
+            <div class="stat-box">
+                <div class="num earnings" id="todayRevenue">$0</div>
+                <div class="lbl">Cobrado Neto</div>
+            </div>
+            <div class="stat-box">
+                <div class="num expected" id="totalExpected">$0</div>
+                <div class="lbl">Retorno Esperado</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MINI BUSCADOR REAL-TIME -->
+    <div class="search-container">
+        <svg class="search-icon-mini" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        <input type="text" id="miniSearch" class="search-input-mini" placeholder="Buscar por nombre, celu, DNI..." oninput="renderList()">
+    </div>
+
+    <!-- SELECTOR DE SEGMENTOS CON CONTADORES DINÁMICOS -->
+    <div class="segmented-control">
+        <button class="segment-btn active" onclick="filterList('todos', this)">
+            <span>Todos</span>
+            <span class="segment-counter" id="count-todos">0</span>
+        </button>
+        <button class="segment-btn" onclick="filterList('deben', this)">
+            <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+            <span>Deben</span>
+            <span class="segment-counter" id="count-deben">0</span>
+        </button>
+        <button class="segment-btn" onclick="filterList('pagado', this)">
+            <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+            <span>Pagados</span>
+            <span class="segment-counter" id="count-pagado">0</span>
+        </button>
+        <button class="segment-btn" onclick="filterList('analisis', this)">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+            <span>Análisis</span>
+            <span class="segment-counter" id="count-analisis">0</span>
+        </button>
+    </div>
+
+    <!-- CONTENEDOR DE TARJETAS -->
+    <div class="cards-container" id="cardsContainer"></div>
+
+    <!-- FAB ACCIÓN -->
+    <button class="fab" onclick="toggleModal(true)">
+        <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+    </button>
+
+    <!-- ACCION FORMULARIO SLIDE-UP -->
+    <div class="modal" id="txModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Nueva Entrada</h3>
+                <button class="close-btn" onclick="toggleModal(false)">Cerrar</button>
+            </div>
+            <form id="txForm" onsubmit="saveClient(event)">
+                <div class="form-row-double">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Últimos 4 Celu</label>
+                        <input type="text" id="formPhone" class="form-control" placeholder="8901" required maxlength="4">
+                    </div>
+                    <div class="form-group" style="flex: 2;">
+                        <label>Nombre Completo</label>
+                        <input type="text" id="formName" class="form-control" placeholder="Ej. Juan Carlos" required>
+                    </div>
+                </div>
+                <div class="form-row-double">
+                    <div class="form-group" style="flex: 1;">
+                        <label>DNI Cliente</label>
+                        <input type="number" id="formDni" class="form-control" placeholder="Nº Documento">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Monto ($)</label>
+                        <input type="number" id="formAmount" class="form-control" value="10000" required>
+                    </div>
+                </div>
+                <div class="form-row-double">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Instagram</label>
+                        <input type="text" id="formIg" class="form-control" placeholder="Ej. juancito">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>WhatsApp Completo</label>
+                        <input type="number" id="formWsp" class="form-control" placeholder="Ej. 2645890123" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Comentario o Promesa de Pago</label>
+                    <input type="text" id="formPromise" class="form-control" placeholder="Paga hoy a la tarde...">
+                </div>
+                <div class="form-group">
+                    <label>Estado Inicial</label>
+                    <select id="formStatus" class="form-control">
+                        <option value="deben">Debe</option>
+                        <option value="analisis" selected>En Análisis</option>
+                        <option value="pagado">Pagado</option>
+                    </select>
+                </div>
+                <button type="submit" class="submit-btn">Cargar al Sistema</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let clients = JSON.parse(localStorage.getItem('sik_clients')) || [];
+        let currentFilter = 'todos';
+
+        // --- SISTEMA DEL MENÚ LATERAL REAL-TIME ---
+        function toggleSideMenu(open) {
+            const overlay = document.getElementById('sideMenuOverlay');
+            if(open) {
+                renderSideMenuLinks(); 
+                overlay.classList.add('open');
+            } else {
+                overlay.classList.remove('open');
+            }
+        }
+
+        function renderSideMenuLinks() {
+            const container = document.getElementById('sideMenuLinksContainer');
+            const menuItems = JSON.parse(localStorage.getItem('sik_menu_items')) || [
+                { label: "Dashboard", link: "org.html", icon: "📊" },
+                { label: "Configurar Menú", link: "menu.html", icon: "⚙️" }
+            ];
+
+            container.innerHTML = menuItems.map(item => `
+                <a href="${item.link}">
+                    <span class="menu-icon-span">${item.icon}</span>
+                    <span>${item.label}</span>
+                </a>
+            `).join('');
+        }
+
+        // --- LÓGICA DE OPERACIONES Y MÉTRICAS ---
+        function toggleModal(show) {
+            const modal = document.getElementById('txModal');
+            if(show) modal.classList.add('open');
+            else {
+                modal.classList.remove('open');
+                document.getElementById('txForm').reset();
+                document.getElementById('formAmount').value = "10000";
+            }
+        }
+
+        function saveClient(e) {
+            e.preventDefault();
+            const newClient = {
+                id: Date.now(),
+                timestamp: Date.now(),
+                phone: document.getElementById('formPhone').value,
+                name: document.getElementById('formName').value,
+                dni: document.getElementById('formDni').value || '---',
+                ig: document.getElementById('formIg').value || '',
+                wsp: document.getElementById('formWsp').value || '',
+                amount: parseFloat(document.getElementById('formAmount').value),
+                promise: document.getElementById('formPromise').value || '',
+                status: document.getElementById('formStatus').value
+            };
+            clients.unshift(newClient);
+            syncData();
+            toggleModal(false);
+        }
+
+        function updateStatus(id, newStatus) {
+            clients = clients.map(c => {
+                if(c.id === id) c.status = newStatus;
+                return c;
+            });
+            syncData();
+        }
+
+        function deleteClient(id) {
+            if(confirm("¿Remover esta tarjeta de control?")) {
+                clients = clients.filter(c => c.id !== id);
+                syncData();
+            }
+        }
+
+        function syncData() {
+            localStorage.setItem('sik_clients', JSON.stringify(clients));
+            calculateMetrics();
+            renderList();
+        }
+
+        function calculateMetrics() {
+            let totalPlaced = 0; let totalRevenue = 0; let totalExpected = 0; let activeTxCount = 0;
+
+            clients.forEach(c => {
+                if(c.status !== 'analisis') {
+                    activeTxCount++;
+                    totalPlaced += c.amount;
+                    totalExpected += (c.amount * 2);
+                    if(c.status === 'pagado') totalRevenue += (c.amount * 2); 
+                }
+            });
+
+            document.getElementById('todayPlaced').innerText = `$${totalPlaced.toLocaleString('es-AR')}`;
+            document.getElementById('txActiveCount').innerText = activeTxCount;
+            document.getElementById('todayRevenue').innerText = `$${totalRevenue.toLocaleString('es-AR')}`;
+            document.getElementById('totalExpected').innerText = `$${totalExpected.toLocaleString('es-AR')}`;
+
+            let progressPercent = Math.min((activeTxCount / 10) * 100, 100);
+            document.getElementById('goalProgress').style.width = `${progressPercent}%`;
+        }
+
+        function updateSegmentCounters() {
+            const searchVal = document.getElementById('miniSearch').value.toLowerCase().trim();
+            
+            // Filtramos la base según el buscador actual para que los contadores sean precisos
+            const matchesSearch = clients.filter(c => {
+                return !searchVal || 
+                       c.name.toLowerCase().includes(searchVal) || 
+                       c.phone.includes(searchVal) || 
+                       c.wsp.includes(searchVal) || 
+                       c.dni.includes(searchVal) || 
+                       c.promise.toLowerCase().includes(searchVal);
+            });
+
+            const cTodos = matchesSearch.length;
+            const cDeben = matchesSearch.filter(c => c.status === 'deben').length;
+            const cPagados = matchesSearch.filter(c => c.status === 'pagado').length;
+            const cAnalisis = matchesSearch.filter(c => c.status === 'analisis').length;
+
+            document.getElementById('count-todos').innerText = cTodos;
+            document.getElementById('count-deben').innerText = cDeben;
+            document.getElementById('count-pagado').innerText = cPagados;
+            document.getElementById('count-analisis').innerText = cAnalisis;
+        }
+
+        function filterList(filter, btn) {
+            currentFilter = filter;
+            document.querySelectorAll('.segment-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderList();
+        }
+
+        function renderList() {
+            const container = document.getElementById('cardsContainer');
+            const searchVal = document.getElementById('miniSearch').value.toLowerCase().trim();
+            container.innerHTML = "";
+
+            // Actualiza los badges numéricos arriba de las listas
+            updateSegmentCounters();
+
+            const filtered = clients.filter(c => {
+                const matchStatus = (currentFilter === 'todos' || c.status === currentFilter);
+                const matchQuery = !searchVal || c.name.toLowerCase().includes(searchVal) || c.phone.includes(searchVal) || c.wsp.includes(searchVal) || c.dni.includes(searchVal) || c.promise.toLowerCase().includes(searchVal);
+                return matchStatus && matchQuery;
+            });
+
+            if(filtered.length === 0) {
+                container.innerHTML = `<div style="padding: 40px 20px; text-align: center; color: #636366; font-size: 13px;">Terminal vacía</div>`;
+                return;
+            }
+
+            const ahora = Date.now();
+            const limite24hs = 24 * 60 * 60 * 1000;
+
+            filtered.forEach(c => {
+                const card = document.createElement('div');
+                card.className = 'client-card';
+                if (c.status === 'deben' && (ahora - c.timestamp) > limite24hs) card.classList.add('expired-alert');
+
+                let igClean = c.ig.trim().replace('@', '');
+                let igMarkup = c.ig ? `<a href="https://instagram.com/${igClean}" target="_blank" class="mini-ig"><svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>@${igClean}</a>` : '';
+                let wspMarkup = c.wsp ? `<a href="https://wa.me/${c.wsp}" target="_blank" class="mini-wsp"><svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.713-1.457L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.413 9.863-9.832.002-2.623-1.023-5.09-2.885-6.956C16.58 1.95 14.102.925 11.479.925c-5.441 0-9.866 4.412-9.869 9.831-.001 1.736.46 3.433 1.334 4.931l-.991 3.623 3.71-.973zm11.565-7.616c-.33-.165-1.952-.964-2.251-1.074-.3-.109-.518-.165-.736.165-.218.331-.843 1.074-1.034 1.294-.19.219-.382.246-.712.082-.33-.165-1.393-.513-2.654-1.638-.98-.874-1.642-1.953-1.834-2.282-.192-.33-.021-.508.143-.672.148-.148.33-.384.495-.577.165-.192.22-.33.33-.55.11-.219.055-.412-.028-.577-.082-.165-.736-1.774-1.008-2.433-.266-.64-.537-.553-.736-.563-.19-.01-.407-.012-.623-.012-.216 0-.569.082-.866.412-.297.331-1.134 1.11-1.134 2.706 0 1.596 1.162 3.136 1.324 3.356.162.22 2.287 3.493 5.542 4.893.774.333 1.379.531 1.851.682.778.247 1.487.213 2.047.129.625-.093 1.952-.798 2.226-1.567.273-.769.273-1.43.191-1.567-.081-.137-.297-.219-.627-.384z"/></svg></a>` : '';
+
+                let moneyClass = '';
+                if(c.status === 'pagado') moneyClass = 'paid';
+                else if(c.status === 'analisis') moneyClass = 'analisis'; 
+
+                let phoneDisplayMarkup = c.wsp ? `<span class="mini-phone-display">TEL: ${c.wsp}</span>` : '';
+                
+                let indicatorMarkup = '';
+                if(c.status === 'deben') {
+                    indicatorMarkup = `<div class="status-glow-dot deben"><svg viewBox="0 0 24 24"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/></svg> Debe</div>`;
+                } else if(c.status === 'pagado') {
+                    indicatorMarkup = `<div class="status-glow-dot pagado"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Cobrado</div>`;
+                } else if(c.status === 'analisis') {
+                    indicatorMarkup = `<div class="status-glow-dot analisis"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg> Análisis</div>`;
+                }
+
+                let promiseBox = c.promise ? `<div class="card-bottom-promise"><svg viewBox="0 0 24 24"><path d="M16 12V4c0-1.1-.9-2-2-2H10c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h1v6l1 1 1-1v-6h1c1.1 0 2-.9 2-2z"/></svg><span>${c.promise}</span></div>` : '';
+
+                card.innerHTML = `
+                    <div class="card-top">
+                        <div class="card-user-info">
+                            <div class="name-row"><span class="phone-tag">${c.phone}</span><span class="client-name">${c.name}</span></div>
+                            <div class="meta-row"><span class="mini-dni">DNI: ${c.dni}</span>${phoneDisplayMarkup}${igMarkup}${wspMarkup}</div>
+                        </div>
+                        <div class="card-financial"><div class="price-display ${moneyClass}">$${c.amount.toLocaleString('es-AR')}</div></div>
+                    </div>
+                    ${promiseBox}
+                    <div class="card-actions-bar">
+                        <select class="status-select-premium" onchange="updateStatus(${c.id}, this.value)">
+                            <option value="deben" ${c.status === 'deben' ? 'selected' : ''}>Marcar Debe</option>
+                            <option value="analisis" ${c.status === 'analisis' ? 'selected' : ''}>Marcar Análisis</option>
+                            <option value="pagado" ${c.status === 'pagado' ? 'selected' : ''}>Marcar Pagado</option>
+                        </select>
+                        <div class="right-controls">
+                            ${indicatorMarkup}
+                            <button class="delete-card-btn" onclick="deleteClient(${c.id})"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        calculateMetrics();
+        renderList();
+    </script>
+</body>
+</html>

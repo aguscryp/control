@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SIK - Core</title>
+    <style>
+        /* Reset de Terminal */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Courier New', Courier, monospace;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        :root {
+            --neon-cyan: #00f2ff;
+            --neon-glow: 0 0 12px rgba(0, 242, 255, 0.6), 0 0 25px rgba(0, 242, 255, 0.3);
+            --neon-pink: #ff0055;
+            --neon-pink-glow: 0 0 12px rgba(255, 0, 85, 0.6), 0 0 25px rgba(255, 0, 85, 0.3);
+        }
+
+        body {
+            background: #010106;
+            min-height: 100vh;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 2.5rem 1.5rem;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Red Neural y Espacio de Fondo */
+        body::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: 
+                radial-gradient(circle at 50% 30%, #050a24 0%, transparent 70%),
+                radial-gradient(1px 1px at 20px 30px, #fff, rgba(0,0,0,0)),
+                radial-gradient(1.5px 1.5px at 75% 15%, var(--neon-cyan), rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 40% 70%, #fff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 85% 80%, rgba(0, 242, 255, 0.3), rgba(0,0,0,0));
+            background-size: 100% 100%, 200px 200px, 350px 350px, 150px 150px, 300px 300px;
+            opacity: 0.75;
+            z-index: 1;
+        }
+
+        /* Línea Láser de Escaneo Global */
+        .laser-scanner {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+            box-shadow: var(--neon-glow);
+            top: 0;
+            left: 0;
+            z-index: 2;
+            animation: scanVertical 5s infinite linear;
+            pointer-events: none;
+        }
+
+        /* --- SECCIÓN SUPERIOR: STATUS & BRAND --- */
+        .hud-top {
+            z-index: 10;
+            text-align: center;
+            margin-top: 1vh;
+        }
+
+        /* Núcleo Central de Energía (Logo) */
+        .core-display {
+            position: relative;
+            width: 110px;
+            height: 110px;
+            margin: 0 auto 1.5rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .core-circle {
+            position: absolute;
+            inset: 0;
+            border: 2px dashed rgba(0, 242, 255, 0.4);
+            border-radius: 50%;
+            animation: rotateClockwise 15s linear infinite;
+        }
+
+        .core-circle-inner {
+            position: absolute;
+            inset: 8px;
+            border: 1px solid var(--neon-cyan);
+            border-radius: 50%;
+            box-shadow: var(--neon-glow), inset 0 0 15px rgba(0, 242, 255, 0.2);
+            animation: pulseGlow 2s infinite alternate;
+        }
+
+        .brand-title {
+            font-size: 1.8rem;
+            font-weight: 900;
+            letter-spacing: 6px;
+            text-shadow: var(--neon-glow);
+            color: #fff;
+        }
+
+        .system-status {
+            font-size: 0.7rem;
+            color: rgba(0, 242, 255, 0.6);
+            letter-spacing: 3px;
+            margin-top: 0.4rem;
+            text-transform: uppercase;
+        }
+
+        /* --- SECCIÓN CENTRAL: INPUT MODULAR --- */
+        .hud-center {
+            z-index: 10;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 2vh 0;
+        }
+
+        .pin-container {
+            display: flex;
+            gap: 20px;
+        }
+
+        /* Casillas totalmente flotantes y transparentes */
+        .pin-slot {
+            width: 55px;
+            height: 55px;
+            background: transparent;
+            border-bottom: 3px solid rgba(0, 242, 255, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.2rem;
+            color: var(--neon-cyan);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .pin-slot.active {
+            border-bottom-color: var(--neon-cyan);
+            text-shadow: var(--neon-glow);
+            animation: blinkLine 0.8s infinite alternate;
+        }
+
+        .pin-slot.error {
+            border-bottom-color: var(--neon-pink);
+            color: var(--neon-pink);
+            text-shadow: var(--neon-pink-glow);
+        }
+
+        /* --- SECCIÓN INFERIOR: KEYPAD INTEGRADO --- */
+        .hud-bottom {
+            z-index: 10;
+            width: 100%;
+            margin-bottom: 1vh;
+        }
+
+        .grid-keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            max-width: 320px;
+            margin: 0 auto;
+        }
+
+        /* Teclas angulares transparentes táctiles */
+        .touch-key {
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid rgba(0, 242, 255, 0.1);
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 1.8rem;
+            height: 68px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            /* Esquinas de diseño militar/tecnológico */
+            clip-path: polygon(10px 0%, 100% 0%, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0% 100%, 0% 10px);
+        }
+
+        /* Explosión de Neón al presionar */
+        .touch-key:active {
+            background: rgba(0, 242, 255, 0.15);
+            border-color: var(--neon-cyan);
+            box-shadow: var(--neon-glow);
+            color: var(--neon-cyan);
+            text-shadow: var(--neon-glow);
+            transform: scale(0.96);
+        }
+
+        .touch-key.action {
+            font-size: 1.1rem;
+            color: rgba(0, 242, 255, 0.4);
+            border-color: rgba(0, 242, 255, 0.05);
+        }
+
+        .touch-key.action:active {
+            color: #fff;
+            border-color: var(--neon-cyan);
+        }
+
+        /* --- ANIMACIONES HUD --- */
+        @keyframes scanVertical {
+            0% { top: 0%; }
+            50% { top: 100%; }
+            100% { top: 0%; }
+        }
+
+        @keyframes rotateClockwise {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes pulseGlow {
+            0% { opacity: 0.5; box-shadow: 0 0 10px rgba(0, 242, 255, 0.2); }
+            100% { opacity: 1; box-shadow: 0 0 25px rgba(0, 242, 255, 0.5); }
+        }
+
+        @keyframes blinkLine {
+            0% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+
+        .screen-shake {
+            animation: shakeUI 0.3s ease-in-out;
+        }
+
+        @keyframes shakeUI {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+    </style>
+</head>
+<body id="hudBody">
+
+    <div class="laser-scanner"></div>
+
+    <div class="hud-top">
+        <div class="core-display">
+            <div class="core-circle"></div>
+            <div class="core-circle-inner"></div>
+            <div style="z-index: 5; font-weight: 900; font-size: 1.2rem; letter-spacing: 1px; color: var(--neon-cyan);">SYS</div>
+        </div>
+        <div class="brand-title">SIK</div>
+        <div class="system-status" id="statusText">AUTH_REQUIRED // PIN_MODE</div>
+    </div>
+
+    <div class="hud-center">
+        <div class="pin-container">
+            <div class="pin-slot" id="slot-0"></div>
+            <div class="pin-slot" id="slot-1"></div>
+            <div class="pin-slot" id="slot-2"></div>
+        </div>
+    </div>
+
+    <div class="hud-bottom">
+        <div class="grid-keypad">
+            <div class="touch-key" onclick="inputDigit('1')">1</div>
+            <div class="touch-key" onclick="inputDigit('2')">2</div>
+            <div class="touch-key" onclick="inputDigit('3')">3</div>
+            <div class="touch-key" onclick="inputDigit('4')">4</div>
+            <div class="touch-key" onclick="inputDigit('5')">5</div>
+            <div class="touch-key" onclick="inputDigit('6')">6</div>
+            <div class="touch-key" onclick="inputDigit('7')">7</div>
+            <div class="touch-key" onclick="inputDigit('8')">8</div>
+            <div class="touch-key" onclick="inputDigit('9')">9</div>
+            <div class="touch-key action" onclick="resetAll()">CLEAR</div>
+            <div class="touch-key" onclick="inputDigit('0')">0</div>
+            <div class="touch-key action" onclick="eraseDigit()">⌫</div>
+        </div>
+    </div>
+
+    <script>
+        const SECURE_PIN = "000";
+        let inputBuffer = "";
+
+        const bodyUI = document.getElementById('hudBody');
+        const statusDisplay = document.getElementById('statusText');
+        const slots = [
+            document.getElementById('slot-0'),
+            document.getElementById('slot-1'),
+            document.getElementById('slot-2')
+        ];
+
+        function inputDigit(digit) {
+            if (inputBuffer.length < 3) {
+                inputBuffer += digit;
+                renderUI();
+
+                if (inputBuffer.length === 3) {
+                    setTimeout(verifyAuth, 180);
+                }
+            }
+        }
+
+        function eraseDigit() {
+            if (inputBuffer.length > 0) {
+                inputBuffer = inputBuffer.slice(0, -1);
+                renderUI();
+            }
+        }
+
+        function resetAll() {
+            inputBuffer = "";
+            renderUI();
+        }
+
+        function renderUI() {
+            statusDisplay.innerText = "AUTH_REQUIRED // PIN_MODE";
+            statusDisplay.style.color = "rgba(0, 242, 255, 0.6)";
+
+            slots.forEach((slot, idx) => {
+                slot.classList.remove('error', 'active');
+                if (idx < inputBuffer.length) {
+                    slot.classList.add('active');
+                    slot.innerText = "•"; // Símbolo cifrado de datos
+                } else {
+                    slot.innerText = "";
+                }
+            });
+        }
+
+        function verifyAuth() {
+            if (inputBuffer === SECURE_PIN) {
+                statusDisplay.innerText = "ACCESS_GRANTED // REDIRECTING...";
+                statusDisplay.style.color = "var(--neon-cyan)";
+                window.location.href = "org.html";
+            } else {
+                // Falla del sistema: Feedback Crítico (Neón Pink)
+                statusDisplay.innerText = "ERROR // INVALID_ACCESS_CODE";
+                statusDisplay.style.color = "var(--neon-pink)";
+
+                slots.forEach(slot => {
+                    slot.classList.remove('active');
+                    slot.classList.add('error');
+                    slot.innerText = "✕";
+                });
+
+                bodyUI.classList.add('screen-shake');
+                
+                if (navigator.vibrate) {
+                    navigator.vibrate([120, 60, 120]);
+                }
+
+                setTimeout(() => {
+                    bodyUI.classList.remove('screen-shake');
+                    resetAll();
+                }, 600);
+            }
+        }
+    </script>
+</body>
+</html>

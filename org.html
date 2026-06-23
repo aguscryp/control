@@ -211,9 +211,9 @@
         .price-display.analisis { color: #ff9f0a; }
         .price-display.paid { color: #30d158; }
 
-        /* --- NUEVA SECCIÓN: HISTORIAL DE NOTAS ULTRA-COMPACTO --- */
+        /* --- HISTORIAL DE NOTAS ULTRA-COMPACTO --- */
         .notes-timeline-wrapper {
-            background: rgba(255, 255, 255, 0.015); border-radius: 8px; padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; border: 1px solid rgba(255, 255, 255, 0.04);
+            background: rgba(255, 255, 255, 0.015); border-radius: 8px; padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; border: 1px solid rgba(255, 255, 255, 0.04); margin-bottom: 2px;
         }
         .timeline-item {
             font-size: 11px; color: #d1d1d6; font-weight: 500; display: flex; align-items: flex-start; gap: 6px; line-height: 14px;
@@ -425,30 +425,21 @@
             return `Vence: ${date.toLocaleDateString('es-AR', options)}`;
         }
 
-        // --- CALCULO ULTRA-EXACTO DEL DIAS DE ATRAZO / RESTANTES ---
         function getCountdownLabel(dateStr, status) {
             if (!dateStr || status === 'pagado') return '';
-            
             const hoy = new Date();
             hoy.setHours(0,0,0,0);
-            
             const parts = dateStr.split('-');
             const vencimiento = new Date(parts[0], parts[1] - 1, parts[2]);
             vencimiento.setHours(0,0,0,0);
-            
             const diffTime = vencimiento.getTime() - hoy.getTime();
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            
-            if (diffDays === 0) {
-                return `(Vence Hoy)`;
-            } else if (diffDays < 0) {
-                return `(Atrasado ${Math.abs(diffDays)}d)`;
-            } else {
-                return `(Faltan ${diffDays}d)`;
-            }
+            if (diffDays === 0) return `(Vence Hoy)`;
+            if (diffDays < 0) return `(Atrasado ${Math.abs(diffDays)}d)`;
+            return `(Faltan ${diffDays}d)`;
         }
 
-        // --- MANEJO DEL MENÚ LATERAL ---
+        // --- MANEJO DEL MENÚ LATERAL PROTEGIDO CONTRA UNDEFINED ---
         function toggleSideMenu(open) {
             const overlay = document.getElementById('sideMenuOverlay');
             if(open) {
@@ -461,14 +452,22 @@
 
         function renderSideMenuLinks() {
             const container = document.getElementById('sideMenuLinksContainer');
-            const menuItems = JSON.parse(localStorage.getItem('sik_menu_items')) || [
-                { label: "Dashboard", link: "org.html", icon: "📊" },
-                { label: "Configurar Menú", link: "menu.html", icon: "⚙️" }
-            ];
+            
+            // Intentamos leer la configuración guardada por menu.html
+            let menuItems = JSON.parse(localStorage.getItem('sik_menu_items'));
+            
+            // Si está vacío, cargamos los accesos base automáticos de respaldo (Cero errores)
+            if (!menuItems || menuItems.length === 0) {
+                menuItems = [
+                    { label: "Dashboard", link: "org.html", icon: "📊" },
+                    { label: "Configurar Menú", link: "menu.html", icon: "⚙️" }
+                ];
+            }
+            
             container.innerHTML = menuItems.map(item => `
-                <a href="${item.link}">
-                    <span class="menu-icon-span">${item.icon}</span>
-                    <span>${item.label}</span>
+                <a href="${item.link || '#'}">
+                    <span class="menu-icon-span">${item.icon || '📍'}</span>
+                    <span>${item.label || 'Enlace'}</span>
                 </a>
             `).join('');
         }
@@ -490,7 +489,6 @@
             e.preventDefault();
             const initialNotes = [];
             const firstPromise = document.getElementById('formPromise').value.trim();
-            
             if (firstPromise) {
                 const date = new Date();
                 const cleanDateStr = `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}`;
@@ -508,14 +506,13 @@
                 amount: parseFloat(document.getElementById('formAmount').value),
                 status: document.getElementById('formStatus').value,
                 dueDate: document.getElementById('formDueDate').value,
-                notes: initialNotes  // Arreglo para ir apilando notas
+                notes: initialNotes
             };
             clients.unshift(newClient);
             syncData();
             toggleModal(false);
         }
 
-        // AGREGAR UNA NOTA RÁPIDA DIRECTAMENTE EN LA TARJETA
         function addQuickNote(clientId) {
             const input = document.getElementById(`quick-input-${clientId}`);
             const text = input.value.trim();
@@ -530,7 +527,7 @@
                 }
                 return c;
             });
-            
+            input.value = ''; 
             syncData();
         }
 
@@ -578,9 +575,7 @@
             const matchesSearch = clients.filter(c => {
                 const prettyDate = formatExpiryDate(c.dueDate).toLowerCase();
                 let matchNotes = false;
-                if(c.notes) {
-                    matchNotes = c.notes.some(n => n.text.toLowerCase().includes(searchVal));
-                }
+                if(c.notes) matchNotes = c.notes.some(n => n.text.toLowerCase().includes(searchVal));
                 return !searchVal || 
                        c.name.toLowerCase().includes(searchVal) || 
                        c.phone.includes(searchVal) || 
@@ -614,9 +609,7 @@
                 const matchStatus = (currentFilter === 'todos' || c.status === currentFilter);
                 const prettyDate = formatExpiryDate(c.dueDate).toLowerCase();
                 let matchNotes = false;
-                if(c.notes) {
-                    matchNotes = c.notes.some(n => n.text.toLowerCase().includes(searchVal));
-                }
+                if(c.notes) matchNotes = c.notes.some(n => n.text.toLowerCase().includes(searchVal));
                 const matchQuery = !searchVal || c.name.toLowerCase().includes(searchVal) || c.phone.includes(searchVal) || c.wsp.includes(searchVal) || c.dni.includes(searchVal) || prettyDate.includes(searchVal) || matchNotes;
                 return matchStatus && matchQuery;
             });
@@ -660,11 +653,9 @@
                 if(c.status === 'pagado') expiryTagClass += ' paid-clear';
                 else if(estaVencido) expiryTagClass += ' expired';
 
-                // Render de fecha más el contador dinámico de días
                 let countdownTxt = getCountdownLabel(c.dueDate, c.status);
                 let prettyExpiryLabel = c.status === 'pagado' ? "Liquidado" : `${formatExpiryDate(c.dueDate)} <span class="days-countdown">${countdownTxt}</span>`;
 
-                // Renderizado del historial de notas
                 let notesTimelineMarkup = '';
                 if(c.notes && c.notes.length > 0) {
                     const itemsHtml = c.notes.map(n => `

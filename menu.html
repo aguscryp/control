@@ -347,7 +347,6 @@
 </head>
 <body>
 
-    <!-- BARRA SUPERIOR -->
     <div class="top-navbar">
         <a href="org.html" class="back-btn">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
@@ -357,7 +356,6 @@
         <div style="width: 75px;"></div>
     </div>
 
-    <!-- PANEL DE KPIs -->
     <div class="kpi-grid">
         <div class="kpi-card"><div class="kpi-val" id="kpiActive">0</div><div class="kpi-lbl">Activas</div></div>
         <div class="kpi-card"><div class="kpi-val" id="kpiBypass">0</div><div class="kpi-lbl">Bypass</div></div>
@@ -368,7 +366,6 @@
         <h2 id="formTitle">Menú Operativo</h2>
         <div class="subtitle">Modificá parámetros de ruteo, duplicá arquitecturas o deslizá para ordenar.</div>
 
-        <!-- FORMULARIO CENTRAL -->
         <form class="menu-form" id="menuForm" onsubmit="saveMenuItem(event)">
             <input type="hidden" id="editingIndex" value="-1">
             <input type="hidden" id="editingIsCore" value="false">
@@ -387,7 +384,6 @@
                 </div>
             </div>
 
-            <!-- EXPANSIÓN DE GALERÍA -->
             <div class="icon-dropdown-panel" id="iconDropdown">
                 <div class="icon-selector-grid">
                     <div class="premium-icon ic-chart selected" onclick="selectIcon('ic-chart', 'fa-solid fa-chart-pie')"><i class="fa-solid fa-chart-pie"></i></div>
@@ -419,7 +415,6 @@
             </div>
         </form>
 
-        <!-- CABECERA DE FILTRADO -->
         <div class="list-header-actions">
             <div class="items-title">Distribución Lateral</div>
             <input type="text" id="menuSearch" class="search-control" placeholder="🔍 Filtrar sección..." oninput="filterMenuItems()">
@@ -427,7 +422,6 @@
 
         <ul class="menu-items-list" id="menuItemsList"></ul>
 
-        <!-- SECCIÓN BACKUP -->
         <div class="backup-section">
             <button class="backup-btn" onclick="exportConfig()"><i class="fa-solid fa-download"></i> Exportar</button>
             <button class="backup-btn" onclick="document.getElementById('importFile').click()"><i class="fa-solid fa-upload"></i> Importar</button>
@@ -444,7 +438,6 @@
         let currentClass = 'ic-chart';
         let currentIcon = 'fa-solid fa-chart-pie';
         
-        // Carga el core personalizado de localStorage o usa el default si no existe
         let coreMenu = JSON.parse(localStorage.getItem('sik_menu_items_core')) || defaultCoreMenu;
         let customMenuItems = JSON.parse(localStorage.getItem('sik_menu_items_custom')) || [];
 
@@ -488,16 +481,15 @@
                 const innerIndex = isCore ? index : index - coreMenu.length;
                 const isChecked = item.active !== false ? 'checked' : '';
                 
-                // Botón de eliminar solo para los personalizados
                 const deleteButtonHTML = !isCore ? `
-                    <button class="action-icon-btn delete" onclick="deleteMenuItem(${innerIndex})">
+                    <button type="button" class="action-icon-btn delete" onclick="deleteMenuItem(${innerIndex})">
                         <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
                     </button>
                 ` : '';
 
                 li.innerHTML = `
                     <div class="item-main-info">
-                        <div class="item-icon-preview ${item.iconClass}"><i class="${item.iconText}"></i></div>
+                        <div class="item-icon-preview ${item.iconClass || 'ic-chart'}"><i class="${item.iconText || 'fa-solid fa-chart-pie'}"></i></div>
                         <div class="item-text-details">
                             <span class="item-label-txt">${item.label}</span>
                             <span class="item-link-txt">${item.link}</span>
@@ -512,10 +504,10 @@
                             </label>
                         </div>
                         <div class="action-buttons-wrap">
-                            <button class="action-icon-btn clone" onclick="cloneMenuItem(${isCore}, ${innerIndex})" title="Duplicar">
+                            <button type="button" class="action-icon-btn clone" onclick="cloneMenuItem(${isCore}, ${innerIndex})" title="Duplicar">
                                 <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
                             </button>
-                            <button class="action-icon-btn edit" onclick="editMenuItem(${isCore}, ${innerIndex})">
+                            <button type="button" class="action-icon-btn edit" onclick="editMenuItem(${isCore}, ${innerIndex})">
                                 <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
                             </button>
                             ${deleteButtonHTML}
@@ -527,7 +519,6 @@
                 listContainer.appendChild(li);
             });
             
-            // Guardamos la lista consolidada completa para que la consuman las demás páginas
             localStorage.setItem('sik_menu_items', JSON.stringify(completeDisplayList));
         }
 
@@ -565,7 +556,7 @@
             renderMenuItems();
         }
 
-        setupTouchDrag(rowElement, customIndex) {
+        function setupTouchDrag(rowElement, customIndex) {
             let startY = 0; let currentElementIndex = customIndex;
             rowElement.addEventListener('touchstart', e => {
                 startY = e.touches[0].clientY; rowElement.classList.add('dragging');
@@ -606,7 +597,6 @@
             if(!targetLink.includes('.')) targetLink += '.html';
 
             if(editingIdx === -1) {
-                // Nuevo elemento personalizado
                 const itemData = {
                     label: labelInput.value.trim(), link: targetLink,
                     iconClass: currentClass, iconText: currentIcon, locked: false, active: true
@@ -614,7 +604,6 @@
                 customMenuItems.push(itemData);
                 localStorage.setItem('sik_menu_items_custom', JSON.stringify(customMenuItems));
             } else {
-                // Modificación existente
                 if(isCoreEditing) {
                     coreMenu[editingIdx].label = labelInput.value.trim();
                     coreMenu[editingIdx].link = targetLink;
@@ -669,7 +658,6 @@
             }
         }
 
-        /* --- EXPORTAR / IMPORTAR RESPALDOS --- */
         function exportConfig() {
             const backupData = { core: coreMenu, custom: customMenuItems };
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));

@@ -110,6 +110,9 @@
         .menu-links-list a:active {
             background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.1);
         }
+        .menu-icon-span {
+            font-size: 16px;
+        }
 
         /* --- DASHBOARD DE OBJETIVOS DIARIOS --- */
         .metrics-header {
@@ -278,7 +281,7 @@
         <div style="width: 42px;"></div>
     </div>
 
-    <!-- PANEL LATERAL DESPLEGABLE CON SINCRONIZACIÓN CORREGIDA -->
+    <!-- PANEL LATERAL DESPLEGABLE -->
     <div class="side-menu-overlay" id="sideMenuOverlay" onclick="toggleSideMenu(false)">
         <div class="side-menu-content" onclick="event.stopPropagation()">
             <div class="menu-brand-header">
@@ -415,6 +418,57 @@
         let clients = JSON.parse(localStorage.getItem('sik_clients')) || [];
         let currentFilter = 'todos';
 
+        // --- FUNCIÓN DE INICIALIZACIÓN DEL MENÚ ULTRA-COMPATIBLE ---
+        function inicializarMenuGlobal() {
+            const container = document.getElementById('sideMenuLinksContainer');
+            if (!container) return;
+
+            // Leemos la base de datos del menú
+            let menuItems = JSON.parse(localStorage.getItem('menuItems'));
+            
+            // Si está vacío, cargamos los de respaldo por defecto
+            if (!menuItems || menuItems.length === 0) {
+                menuItems = [
+                    { name: "Dashboard", url: "org.html", icon: "📊" },
+                    { name: "Configurar Menú", url: "menu.html", icon: "⚙️" }
+                ];
+            }
+            
+            // Renderizamos mapeando CUALQUIER variante de nombres que uses en menu.html
+            container.innerHTML = menuItems.map(item => {
+                // Detecta automáticamente si usaste .url o .link
+                const destinoUrl = item.url || item.link || '#';
+                
+                // Detecta si usaste .name, .label o .texto
+                const textoNombre = item.name || item.label || item.texto || 'Enlace';
+                
+                // Detecta si usaste .icon o .icono
+                const iconoVisual = item.icon || item.icono || '📍';
+
+                return `
+                    <a href="${destinoUrl}">
+                        <span class="menu-icon-span">${iconoVisual}</span>
+                        <span>${textoNombre}</span>
+                    </a>
+                `;
+            }).join('');
+        }
+
+        // Ejecutamos la carga inmediatamente al montar el DOM
+        document.addEventListener("DOMContentLoaded", () => {
+            inicializarMenuGlobal();
+        });
+
+        function toggleSideMenu(open) {
+            const overlay = document.getElementById('sideMenuOverlay');
+            if(open) {
+                inicializarMenuGlobal(); // Actualiza cambios en caliente antes de mostrar
+                overlay.classList.add('open');
+            } else {
+                overlay.classList.remove('open');
+            }
+        }
+
         function initDefaultDueDate() {
             const date = new Date();
             date.setDate(date.getDate() + 30);
@@ -445,40 +499,6 @@
             if (diffDays === 0) return `(Vence Hoy)`;
             if (diffDays < 0) return `(Atrasado ${Math.abs(diffDays)}d)`;
             return `(Faltan ${diffDays}d)`;
-        }
-
-        // --- MANEJO DEL MENÚ LATERAL SINCRONIZADO COMO NOTA.HTML ---
-        function toggleSideMenu(open) {
-            const overlay = document.getElementById('sideMenuOverlay');
-            if(open) {
-                renderSideMenuLinks(); 
-                overlay.classList.add('open');
-            } else {
-                overlay.classList.remove('open');
-            }
-        }
-
-        function renderSideMenuLinks() {
-            const container = document.getElementById('sideMenuLinksContainer');
-            
-            // Cambiado exactamente a 'menuItems' para que lea lo mismo que nota.html y menu.html
-            let menuItems = JSON.parse(localStorage.getItem('menuItems'));
-            
-            // Fallback por si la lista global está completamente limpia
-            if (!menuItems || menuItems.length === 0) {
-                menuItems = [
-                    { name: "Dashboard", url: "org.html", icon: "📊" },
-                    { name: "Configurar Menú", url: "menu.html", icon: "⚙️" }
-                ];
-            }
-            
-            // El mapeo ahora usa .url y .name como lo configuraste en tu archivo de menú
-            container.innerHTML = menuItems.map(item => `
-                <a href="${item.url || '#'}">
-                    <span class="menu-icon-span">${item.icon || '📍'}</span>
-                    <span>${item.name || 'Enlace'}</span>
-                </a>
-            `).join('');
         }
 
         // --- MÓDULOS DE DATOS ---

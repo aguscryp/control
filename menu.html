@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-    <title>SIK - Configurar Menú</title>
+    <title>SIK - Centro de Control Estructural</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         /* --- ESTÉTICA CYBER-EXECUTIVE NOIR --- */
         * {
@@ -21,12 +22,11 @@
             letter-spacing: -0.2px;
         }
 
-        /* --- BARRA SUPERIOR DE NAVEGACIÓN --- */
         .top-navbar {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
 
         .back-btn {
@@ -52,7 +52,37 @@
             color: #8e8e93;
         }
 
-        /* --- CONTENEDOR PRINCIPAL --- */
+        /* --- DASHBOARD DE MÉTRICAS (KPIs) --- */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .kpi-card {
+            background: rgba(28, 28, 30, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 14px;
+            padding: 12px 10px;
+            text-align: center;
+        }
+
+        .kpi-val {
+            font-size: 18px;
+            font-weight: 800;
+            color: #ffffff;
+        }
+
+        .kpi-lbl {
+            font-size: 9px;
+            color: #8e8e93;
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-top: 2px;
+            letter-spacing: 0.5px;
+        }
+
         .config-card {
             background: linear-gradient(145deg, rgba(28, 28, 30, 0.5) 0%, rgba(18, 18, 20, 0.7) 100%);
             border-radius: 20px;
@@ -66,40 +96,37 @@
             font-size: 20px;
             font-weight: 800;
             letter-spacing: -0.5px;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
 
         .subtitle {
             font-size: 12px;
             color: #8e8e93;
-            margin-bottom: 18px;
+            margin-bottom: 20px;
             line-height: 16px;
         }
 
-        /* --- FORMULARIO DE INGRESO COMPACTO --- */
+        /* --- FORMULARIO Y SELECTORES --- */
         .menu-form {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 14px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            padding-bottom: 20px;
-            margin-bottom: 16px;
+            padding-bottom: 22px;
+            margin-bottom: 18px;
         }
 
-        .form-row {
+        .form-row-upper {
             display: flex;
-            gap: 10px;
+            align-items: flex-end;
+            gap: 12px;
         }
 
         .form-group {
-            flex: 1;
             display: flex;
             flex-direction: column;
-            gap: 5px;
-        }
-
-        .form-group.emoji-width {
-            flex: 0 0 70px;
+            gap: 6px;
+            flex: 1;
         }
 
         label {
@@ -115,44 +142,128 @@
             background-color: #1c1c1e;
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 10px;
-            padding: 10px 12px;
+            padding: 12px;
             color: #ffffff;
             font-size: 14px;
             outline: none;
         }
-        .form-control:focus {
-            border-color: rgba(255, 255, 255, 0.2);
-        }
+        .form-control::placeholder { color: #555559; }
 
-        .add-btn {
-            background-color: #ffffff;
-            color: #000000;
-            border: 0;
-            padding: 12px;
+        .icon-trigger-btn {
+            width: 48px;
+            height: 45px;
             border-radius: 10px;
-            font-size: 14px;
-            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
             cursor: pointer;
-            transition: opacity 0.2s;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.2);
+            transition: transform 0.2s;
         }
-        .add-btn:active {
-            opacity: 0.8;
+        .icon-trigger-btn:active { transform: scale(0.95); }
+
+        .icon-dropdown-panel {
+            display: none;
+            background: rgba(28, 28, 30, 0.98);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 16px;
+            padding: 14px;
+            margin-top: -6px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .icon-dropdown-panel.show { display: block; }
+
+        .icon-selector-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
         }
 
-        /* --- LISTA DE ITEMS ULTRA-COMPACTA --- */
+        .premium-icon {
+            height: 44px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.2s;
+        }
+        .premium-icon.selected {
+            border-color: #ffffff;
+            box-shadow: 0 0 10px rgba(255,255,255,0.2);
+            transform: scale(1.05);
+        }
+
+        /* Cromática Neón SIK */
+        .ic-chart   { background: linear-gradient(135deg, #004757, #001f26); color: #64d2ff; }
+        .ic-wallet  { background: linear-gradient(135deg, #0b4622, #031409); color: #30d158; }
+        .ic-users   { background: linear-gradient(135deg, #441461, #1b052b); color: #bf5af2; }
+        .ic-target  { background: linear-gradient(135deg, #521616, #210505); color: #ff453a; }
+        .ic-cal     { background: linear-gradient(135deg, #523400, #241600); color: #ff9f0a; }
+        .ic-msg     { background: linear-gradient(135deg, #0a3361, #031429); color: #0a84ff; }
+        .ic-shield  { background: linear-gradient(135deg, #404043, #1c1c1e); color: #e5e5ea; }
+        .ic-bolt    { background: linear-gradient(135deg, #4d4400, #211d00); color: #ffd60a; }
+        .ic-folder  { background: linear-gradient(135deg, #422a14, #1f1205); color: #f5a623; }
+        .ic-link    { background: linear-gradient(135deg, #204857, #0b1e26); color: #70e0ff; }
+        .ic-key     { background: linear-gradient(135deg, #574d11, #211d04); color: #ffdf43; }
+        .ic-bell    { background: linear-gradient(135deg, #541d4b, #21041c); color: #ff6bf2; }
+        .ic-briefcase{ background: linear-gradient(135deg, #2d3b4d, #121921); color: #a2b5cd; }
+        .ic-terminal{ background: linear-gradient(135deg, #184734, #051a10); color: #43ff9f; }
+        .ic-config  { background: linear-gradient(135deg, #2c2c2e, #121214); color: #8e8e93; }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 6px;
+        }
+        .add-btn {
+            flex: 2; background-color: #ffffff; color: #000000; border: 0;
+            padding: 12px; border-radius: 10px; font-size: 14px; font-weight: 700;
+        }
+        .cancel-btn {
+            flex: 1; background-color: #2c2c2e; color: #ff453a;
+            border: 1px solid rgba(255, 69, 58, 0.2); padding: 12px;
+            border-radius: 10px; font-size: 14px; font-weight: 600; display: none;
+        }
+
+        /* --- BARRA DE CONTROL DE LISTADO (BUSCADOR) --- */
+        .list-header-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            gap: 10px;
+        }
         .items-title {
-            font-size: 11px;
+            font-size: 10px;
             text-transform: uppercase;
             letter-spacing: 1.5px;
             color: #8e8e93;
             font-weight: 700;
-            margin-bottom: 10px;
+            white-space: nowrap;
+        }
+        .search-control {
+            max-width: 160px;
+            background-color: #1c1c1e;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 8px;
+            padding: 6px 10px;
+            color: #ffffff;
+            font-size: 12px;
+            outline: none;
         }
 
+        /* --- LISTA ESTRUCTURAL --- */
         .menu-items-list {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
             list-style: none;
         }
 
@@ -162,65 +273,85 @@
             justify-content: space-between;
             background: rgba(255, 255, 255, 0.02);
             border: 1px solid rgba(255, 255, 255, 0.04);
-            padding: 10px 12px;
-            border-radius: 10px;
+            padding: 12px;
+            border-radius: 12px;
+            touch-action: none;
+            transition: all 0.2s ease;
+        }
+        .menu-item-row.system-locked {
+            border-color: rgba(142, 142, 147, 0.12);
+            background: rgba(142, 142, 147, 0.01);
+            touch-action: auto;
+        }
+        .menu-item-row.dragging {
+            opacity: 0.6;
+            background: rgba(28, 28, 30, 0.95);
+            border-color: rgba(255, 255, 255, 0.2);
         }
 
-        .item-main-info {
+        /* Estado Deshabilitado */
+        .menu-item-row.disabled-state { border-color: rgba(255, 69, 58, 0.1); background: rgba(255, 69, 58, 0.01); }
+        .menu-item-row.disabled-state .item-label-txt { color: #555559; text-decoration: line-through; }
+        .menu-item-row.disabled-state .item-icon-preview { opacity: 0.3; filter: grayscale(1); }
+
+        .item-main-info { display: flex; align-items: center; gap: 12px; pointer-events: none; }
+        .item-icon-preview {
+            width: 38px; height: 38px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 15px; border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .item-text-details { display: flex; flex-direction: column; gap: 2px; }
+        .item-label-txt { font-size: 14px; font-weight: 600; color: #ffffff; }
+        .item-link-txt { font-size: 11px; color: #8e8e93; font-family: monospace; }
+
+        .row-controls { display: flex; align-items: center; gap: 10px; }
+
+        /* TOGGLE SWITCH */
+        .toggle-container { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+        .toggle-label { font-size: 8px; font-weight: 700; color: #8e8e93; text-transform: uppercase; }
+        .switch { position: relative; display: inline-block; width: 34px; height: 20px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(255,255,255,0.1); transition: .2s;
+            border-radius: 18px; border: 1px solid rgba(255,255,255,0.05);
+        }
+        .slider:before {
+            position: absolute; content: ""; height: 14px; width: 14px;
+            left: 2px; bottom: 2px; background-color: #8e8e93; transition: .2s; border-radius: 50%;
+        }
+        input:checked + .slider { background-color: #30d158; }
+        input:checked + .slider:before { transform: translateX(14px); background-color: #ffffff; }
+
+        .action-buttons-wrap { display: flex; gap: 1px; }
+        .action-icon-btn {
+            background: transparent; border: 0; cursor: pointer;
+            padding: 6px; display: flex; align-items: center; border-radius: 6px;
+        }
+        .action-icon-btn.clone { color: #64d2ff; }
+        .action-icon-btn.edit { color: #ffd60a; }
+        .action-icon-btn.delete { color: rgba(255, 69, 58, 0.7); }
+        .action-icon-btn svg { width: 14px; height: 14px; fill: currentColor; }
+
+        /* --- CONTROLES DE RESPALDO (BACKUP) --- */
+        .backup-section {
             display: flex;
-            align-items: center;
-            gap: 12px;
+            gap: 10px;
+            margin-top: 24px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            padding-top: 18px;
         }
-
-        .item-icon-box {
-            font-size: 16px;
-            background: rgba(255, 255, 255, 0.05);
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 8px;
-        }
-
-        .item-text-details {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .item-label-txt {
-            font-size: 14px;
-            font-weight: 600;
-            color: #ffffff;
-        }
-
-        .item-link-txt {
-            font-size: 11px;
-            color: #64d2ff;
-            font-family: monospace;
-        }
-
-        .delete-item-btn {
-            background: transparent;
-            border: 0;
-            color: rgba(255, 69, 58, 0.6);
-            cursor: pointer;
-            padding: 6px;
-            display: flex;
-            align-items: center;
-            border-radius: 6px;
-        }
-        .delete-item-btn svg {
-            width: 14px;
-            height: 14px;
-            fill: currentColor;
+        .backup-btn {
+            flex: 1; background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08); color: #aeaeae;
+            padding: 10px; border-radius: 10px; font-size: 11px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
         }
     </style>
 </head>
 <body>
 
-    <!-- BARRA SUPERIOR -->
     <div class="top-navbar">
         <a href="org.html" class="back-btn">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
@@ -230,21 +361,50 @@
         <div style="width: 75px;"></div>
     </div>
 
-    <!-- PANEL DE CONFIGURACIÓN -->
-    <div class="config-card">
-        <h2>Menú Lateral</h2>
-        <div class="subtitle">Agregá o remové los accesos directos que ven los usuarios logeados en la barra de control central.</div>
+    <div class="kpi-grid">
+        <div class="kpi-card"><div class="kpi-val" id="kpiActive">0</div><div class="kpi-lbl">Activas</div></div>
+        <div class="kpi-card"><div class="kpi-val" id="kpiBypass">0</div><div class="kpi-lbl">Bypass</div></div>
+        <div class="kpi-card"><div class="kpi-val" id="kpiTotal">0</div><div class="kpi-lbl">Total Base</div></div>
+    </div>
 
-        <!-- FORMULARIO NUEVA SECCIÓN -->
-        <form class="menu-form" id="menuForm" onsubmit="addMenuItem(event)">
-            <div class="form-row">
-                <div class="form-group emoji-width">
+    <div class="config-card">
+        <h2 id="formTitle">Menú Operativo</h2>
+        <div class="subtitle">Modificá parámetros de ruteo, duplicá arquitecturas o deslizá para ordenar.</div>
+
+        <form class="menu-form" id="menuForm" onsubmit="saveMenuItem(event)">
+            <input type="hidden" id="editingIndex" value="-1">
+            
+            <div class="form-row-upper">
+                <div style="display:flex; flex-direction:column; gap:6px;">
                     <label>Ícono</label>
-                    <input type="text" id="itemIcon" class="form-control" placeholder="📊" required maxlength="2" style="text-align: center;">
+                    <div class="icon-trigger-btn ic-chart" id="iconTrigger" onclick="toggleIconPanel()">
+                        <i id="triggerIconDisplay" class="fa-solid fa-chart-pie"></i>
+                    </div>
                 </div>
+                
                 <div class="form-group">
                     <label>Nombre de Sección</label>
                     <input type="text" id="itemLabel" class="form-control" placeholder="Ej. Prospectos" required>
+                </div>
+            </div>
+
+            <div class="icon-dropdown-panel" id="iconDropdown">
+                <div class="icon-selector-grid">
+                    <div class="premium-icon ic-chart selected" onclick="selectIcon('ic-chart', 'fa-solid fa-chart-pie')"><i class="fa-solid fa-chart-pie"></i></div>
+                    <div class="premium-icon ic-wallet" onclick="selectIcon('ic-wallet', 'fa-solid fa-wallet')"><i class="fa-solid fa-wallet"></i></div>
+                    <div class="premium-icon ic-users" onclick="selectIcon('ic-users', 'fa-solid fa-user-tie')"><i class="fa-solid fa-user-tie"></i></div>
+                    <div class="premium-icon ic-target" onclick="selectIcon('ic-target', 'fa-solid fa-bullseye')"><i class="fa-solid fa-bullseye"></i></div>
+                    <div class="premium-icon ic-cal" onclick="selectIcon('ic-cal', 'fa-solid fa-calendar-days')"><i class="fa-solid fa-calendar-days"></i></div>
+                    <div class="premium-icon ic-msg" onclick="selectIcon('ic-msg', 'fa-solid fa-comment-dots')"><i class="fa-solid fa-comment-dots"></i></div>
+                    <div class="premium-icon ic-shield" onclick="selectIcon('ic-shield', 'fa-solid fa-shield-halved')"><i class="fa-solid fa-shield-halved"></i></div>
+                    <div class="premium-icon ic-bolt" onclick="selectIcon('ic-bolt', 'fa-solid fa-bolt')"><i class="fa-solid fa-bolt"></i></div>
+                    <div class="premium-icon ic-folder" onclick="selectIcon('ic-folder', 'fa-solid fa-folder-open')"><i class="fa-solid fa-folder-open"></i></div>
+                    <div class="premium-icon ic-link" onclick="selectIcon('ic-link', 'fa-solid fa-link')"><i class="fa-solid fa-link"></i></div>
+                    <div class="premium-icon ic-key" onclick="selectIcon('ic-key', 'fa-solid fa-key')"><i class="fa-solid fa-key"></i></div>
+                    <div class="premium-icon ic-bell" onclick="selectIcon('ic-bell', 'fa-solid fa-bell')"><i class="fa-solid fa-bell"></i></div>
+                    <div class="premium-icon ic-briefcase" onclick="selectIcon('ic-briefcase', 'fa-solid fa-briefcase')"><i class="fa-solid fa-briefcase"></i></div>
+                    <div class="premium-icon ic-terminal" onclick="selectIcon('ic-terminal', 'fa-solid fa-terminal')"><i class="fa-solid fa-terminal"></i></div>
+                    <div class="premium-icon ic-config" onclick="selectIcon('ic-config', 'fa-solid fa-sliders')"><i class="fa-solid fa-sliders"></i></div>
                 </div>
             </div>
             
@@ -253,89 +413,269 @@
                 <input type="text" id="itemLink" class="form-control" placeholder="Ej. prospectos.html" required>
             </div>
 
-            <button type="submit" class="add-btn">Agregar Enlace</button>
+            <div class="action-buttons">
+                <button type="submit" class="add-btn" id="submitBtn">Agregar al Panel</button>
+                <button type="button" class="cancel-btn" id="cancelBtn" onclick="resetForm()">Cancelar</button>
+            </div>
         </form>
 
-        <!-- LISTADO ACTUAL -->
-        <div class="items-title">Secciones Activas</div>
+        <div class="list-header-actions">
+            <div class="items-title">Distribución Lateral</div>
+            <input type="text" id="menuSearch" class="search-control" placeholder="🔍 Filtrar sección..." oninput="filterMenuItems()">
+        </div>
+
         <ul class="menu-items-list" id="menuItemsList"></ul>
+
+        <div class="backup-section">
+            <button class="backup-btn" onclick="exportConfig()"><i class="fa-solid fa-download"></i> Exportar</button>
+            <button class="backup-btn" onclick="document.getElementById('importFile').click()"><i class="fa-solid fa-upload"></i> Importar</button>
+            <input type="file" id="importFile" style="display:none;" accept=".json" onchange="importConfig(event)">
+        </div>
     </div>
 
     <script>
-        // Si no existe nada guardado en LocalStorage, cargamos la configuración inicial por defecto
-        const defaultMenu = [
-            { label: "Control Central", link: "org.html", icon: "📊" }
+        const coreLockedMenu = [
+            { label: "Dashboard", link: "org.html", iconClass: "ic-chart", iconText: "fa-solid fa-chart-pie", locked: true, active: true },
+            { label: "Configurar Menú", link: "menu.html", iconClass: "ic-config", iconText: "fa-solid fa-sliders", locked: true, active: true }
         ];
 
-        let menuItems = JSON.parse(localStorage.getItem('sik_menu_items')) || defaultMenu;
+        let currentClass = 'ic-chart';
+        let currentIcon = 'fa-solid fa-chart-pie';
+        let customMenuItems = JSON.parse(localStorage.getItem('sik_menu_items_custom')) || [];
+
+        function toggleIconPanel() { document.getElementById('iconDropdown').classList.toggle('show'); }
+
+        function selectIcon(cssClass, iconStr) {
+            document.querySelectorAll('.premium-icon').forEach(el => el.classList.remove('selected'));
+            const targetNode = document.querySelector(`.premium-icon.${cssClass}`);
+            if(targetNode) targetNode.classList.add('selected');
+
+            const trigger = document.getElementById('iconTrigger');
+            trigger.className = `icon-trigger-btn ${cssClass}`;
+            document.getElementById('triggerIconDisplay').className = iconStr;
+
+            currentClass = cssClass; currentIcon = iconStr;
+            document.getElementById('iconDropdown').classList.remove('show');
+        }
+
+        function calculateKPIs(completeList) {
+            const total = completeList.length;
+            const active = completeList.filter(i => i.active !== false).length;
+            document.getElementById('kpiActive').innerText = active;
+            document.getElementById('kpiBypass').innerText = total - active;
+            document.getElementById('kpiTotal').innerText = total;
+        }
 
         function renderMenuItems() {
             const listContainer = document.getElementById('menuItemsList');
             listContainer.innerHTML = "";
+            const completeDisplayList = [...coreLockedMenu, ...customMenuItems];
+            calculateKPIs(completeDisplayList);
 
-            if (menuItems.length === 0) {
-                listContainer.innerHTML = `<div style="padding: 20px; text-align: center; color: #636366; font-size: 12px;">No hay accesos configurados</div>`;
-                return;
-            }
-
-            menuItems.forEach((item, index) => {
+            completeDisplayList.forEach((item, index) => {
                 const li = document.createElement('li');
                 li.className = 'menu-item-row';
-                li.innerHTML = `
-                    <div class="item-main-info">
-                        <div class="item-icon-box">${item.icon}</div>
-                        <div class="item-text-details">
-                            <span class="item-label-txt">${item.label}</span>
-                            <span class="item-link-txt">${item.link}</span>
+                li.setAttribute('data-label', item.label.toLowerCase());
+                
+                if(item.active === false) li.classList.add('disabled-state');
+
+                if(item.locked) {
+                    li.classList.add('system-locked');
+                    li.innerHTML = `
+                        <div class="item-main-info">
+                            <div class="item-icon-preview ${item.iconClass}"><i class="${item.iconText}"></i></div>
+                            <div class="item-text-details">
+                                <span class="item-label-txt">${item.label}</span>
+                                <span class="item-link-txt">${item.link}</span>
+                            </div>
                         </div>
-                    </div>
-                    <button class="delete-item-btn" onclick="deleteMenuItem(${index})">
-                        <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
-                    </button>
-                `;
+                        <div class="toggle-container"><span class="toggle-label" style="color:#30d158;">Core</span></div>
+                    `;
+                } else {
+                    const customIndex = index - coreLockedMenu.length;
+                    const isChecked = item.active !== false ? 'checked' : '';
+                    
+                    li.innerHTML = `
+                        <div class="item-main-info">
+                            <div class="item-icon-preview ${item.iconClass}"><i class="${item.iconText}"></i></div>
+                            <div class="item-text-details">
+                                <span class="item-label-txt">${item.label}</span>
+                                <span class="item-link-txt">${item.link}</span>
+                            </div>
+                        </div>
+                        <div class="row-controls">
+                            <div class="toggle-container">
+                                <span class="toggle-label">${item.active !== false ? 'ON' : 'OFF'}</span>
+                                <label class="switch">
+                                    <input type="checkbox" ${isChecked} onchange="toggleItemActive(${customIndex}, this)">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="action-buttons-wrap">
+                                <button class="action-icon-btn clone" onclick="cloneMenuItem(${customIndex})" title="Duplicar">
+                                    <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                                </button>
+                                <button class="action-icon-btn edit" onclick="editMenuItem(${customIndex})">
+                                    <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                                </button>
+                                <button class="action-icon-btn delete" onclick="deleteMenuItem(${customIndex})">
+                                    <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    setupTouchDrag(li, customIndex);
+                }
                 listContainer.appendChild(li);
             });
+            localStorage.setItem('sik_menu_items', JSON.stringify(completeDisplayList));
         }
 
-        function addMenuItem(e) {
-            e.preventDefault();
-            
-            const labelInput = document.getElementById('itemLabel');
-            const linkInput = document.getElementById('itemLink');
-            const iconInput = document.getElementById('itemIcon');
-
-            // Limpieza básica de la extensión si se olvidan de ponerla
-            let targetLink = linkInput.value.trim();
-            if(!targetLink.includes('.')) {
-                targetLink += '.html';
-            }
-
-            const newItem = {
-                label: labelInput.value.trim(),
-                link: targetLink,
-                icon: iconInput.value.trim()
-            };
-
-            menuItems.push(newItem);
-            localStorage.setItem('sik_menu_items', JSON.stringify(menuItems));
-            
-            // Resetear formulario
-            labelInput.value = "";
-            linkInput.value = "";
-            iconInput.value = "🔹"; // Deja uno por defecto para la próxima
-
+        function toggleItemActive(customIndex, checkbox) {
+            customMenuItems[customIndex].active = checkbox.checked;
+            localStorage.setItem('sik_menu_items_custom', JSON.stringify(customMenuItems));
             renderMenuItems();
         }
 
-        function deleteMenuItem(index) {
-            if(confirm("¿Remover este acceso del menú lateral?")) {
-                menuItems.splice(index, 1);
-                localStorage.setItem('sik_menu_items', JSON.stringify(menuItems));
+        /* --- FILTRADO INTELIGENTE --- */
+        function filterMenuItems() {
+            const query = document.getElementById('menuSearch').value.toLowerCase().trim();
+            document.querySelectorAll('.menu-item-row').forEach(row => {
+                if(row.classList.contains('system-locked')) return;
+                const txt = row.getAttribute('data-label');
+                row.style.display = txt.includes(query) ? 'flex' : 'none';
+            });
+        }
+
+        /* --- FUNCIÓN CLONAR (1-CLICK) --- */
+        function cloneMenuItem(customIndex) {
+            const origin = customMenuItems[customIndex];
+            const cloned = {
+                label: origin.label + " (Copia)",
+                link: "copia_" + origin.link,
+                iconClass: origin.iconClass,
+                iconText: origin.iconText,
+                locked: false,
+                active: true
+            };
+            customMenuItems.push(cloned);
+            localStorage.setItem('sik_menu_items_custom', JSON.stringify(customMenuItems));
+            renderMenuItems();
+        }
+
+        function setupTouchDrag(rowElement, customIndex) {
+            let startY = 0; let currentElementIndex = customIndex;
+            rowElement.addEventListener('touchstart', e => {
+                startY = e.touches[0].clientY; rowElement.classList.add('dragging');
+            }, { passive: true });
+
+            rowElement.addEventListener('touchmove', e => {
+                if(document.getElementById('menuSearch').value !== "") return; // Bloquear drag al buscar
+                const currentY = e.touches[0].clientY; const diff = currentY - startY;
+
+                if (diff > 45 && currentElementIndex < customMenuItems.length - 1) {
+                    const tmp = customMenuItems[currentElementIndex];
+                    customMenuItems[currentElementIndex] = customMenuItems[currentElementIndex + 1];
+                    customMenuItems[currentElementIndex + 1] = tmp;
+                    localStorage.setItem('sik_menu_items_custom', JSON.stringify(customMenuItems));
+                    startY = currentY; currentElementIndex++; renderMenuItems();
+                } else if (diff < -45 && currentElementIndex > 0) {
+                    const tmp = customMenuItems[currentElementIndex];
+                    customMenuItems[currentElementIndex] = customMenuItems[currentElementIndex - 1];
+                    customMenuItems[currentElementIndex - 1] = tmp;
+                    localStorage.setItem('sik_menu_items_custom', JSON.stringify(customMenuItems));
+                    startY = currentY; currentElementIndex--; renderMenuItems();
+                }
+            }, { passive: true });
+
+            rowElement.addEventListener('touchend', () => {
+                document.querySelectorAll('.menu-item-row').forEach(el => el.classList.remove('dragging'));
+            });
+        }
+
+        function saveMenuItem(e) {
+            e.preventDefault();
+            const labelInput = document.getElementById('itemLabel');
+            const linkInput = document.getElementById('itemLink');
+            const editingIdx = parseInt(document.getElementById('editingIndex').value);
+
+            let targetLink = linkInput.value.trim();
+            if(!targetLink.includes('.')) targetLink += '.html';
+
+            const itemData = {
+                label: labelInput.value.trim(), link: targetLink,
+                iconClass: currentClass, iconText: currentIcon, locked: false,
+                active: editingIdx === -1 ? true : (customMenuItems[editingIdx].active !== false)
+            };
+
+            if(editingIdx === -1) customMenuItems.push(itemData);
+            else customMenuItems[editingIdx] = itemData;
+
+            localStorage.setItem('sik_menu_items_custom', JSON.stringify(customMenuItems));
+            resetForm(); renderMenuItems();
+        }
+
+        function editMenuItem(customIndex) {
+            const item = customMenuItems[customIndex];
+            document.getElementById('editingIndex').value = customIndex;
+            document.getElementById('itemLabel').value = item.label;
+            document.getElementById('itemLink').value = item.link;
+            document.getElementById('formTitle').innerText = "Modificar Sección";
+            document.getElementById('submitBtn').innerText = "Guardar Cambios";
+            document.getElementById('submitBtn').style.backgroundColor = "#ffd60a";
+            document.getElementById('cancelBtn').style.display = "block";
+            selectIcon(item.iconClass, item.iconText);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function resetForm() {
+            document.getElementById('editingIndex').value = "-1";
+            document.getElementById('itemLabel').value = ""; document.getElementById('itemLink').value = "";
+            document.getElementById('formTitle').innerText = "Menú Operativo";
+            document.getElementById('submitBtn').innerText = "Agregar al Panel";
+            document.getElementById('submitBtn').style.backgroundColor = "#ffffff";
+            document.getElementById('cancelBtn').style.display = "none";
+            selectIcon('ic-chart', 'fa-solid fa-chart-pie');
+            document.getElementById('iconDropdown').classList.remove('show');
+        }
+
+        function deleteMenuItem(customIndex) {
+            if(confirm("¿Remover esta sección definitivamente?")) {
+                customMenuItems.splice(customIndex, 1);
+                localStorage.setItem('sik_menu_items_custom', JSON.stringify(customMenuItems));
                 renderMenuItems();
             }
         }
 
-        // Ejecutar carga inicial
+        /* --- EXPORTAR / IMPORTAR RESPALDOS --- */
+        function exportConfig() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(customMenuItems, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "sik_menu_backup.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function importConfig(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    const parsed = JSON.parse(evt.target.result);
+                    if(Array.isArray(parsed)) {
+                        customMenuItems = parsed;
+                        localStorage.setItem('sik_menu_items_custom', JSON.stringify(customMenuItems));
+                        renderMenuItems();
+                        alert("Estructura de Menús de SIK cargada con éxito.");
+                    } else alert("Formato de backup inválido.");
+                } catch(err) { alert("Error al leer el archivo."); }
+            };
+            reader.readAsText(file);
+        }
+
         renderMenuItems();
     </script>
 </body>

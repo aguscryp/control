@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>SIK - Notas Rápidas</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* --- ESTÉTICA EXECUTIVO NOIR / APPLE STYLE --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            letter-spacing: -0.2px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Contenedor Superior de Estado */
+        .notes-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .status-indicator {
+            font-size: 11px;
+            font-weight: 600;
+            color: #8e8e93;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-indicator.saving { color: #ffd60a; }
+        .status-indicator.saved { color: #30d158; }
+
+        .clear-btn {
+            background: rgba(255, 69, 58, 0.1);
+            border: 1px solid rgba(255, 69, 58, 0.2);
+            color: #ff453a;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .clear-btn:active { transform: scale(0.95); }
+
+        /* Lienzo de Escritura Libre */
+        .canvas-area {
+            flex: 1;
+            padding: 24px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow-y: auto;
+        }
+
+        /* Título de la Nota */
+        .note-title-input {
+            width: 100%;
+            background: transparent;
+            border: 0;
+            color: #ffffff;
+            font-size: 26px;
+            font-weight: 800;
+            letter-spacing: -0.8px;
+            outline: none;
+        }
+        .note-title-input::placeholder { color: #2c2c2e; }
+
+        /* Cuerpo de la Nota */
+        .note-textarea {
+            width: 100%;
+            flex: 1;
+            background: transparent;
+            border: 0;
+            color: #e5e5ea;
+            font-size: 16px;
+            line-height: 1.5;
+            resize: none;
+            outline: none;
+        }
+        .note-textarea::placeholder { color: #3a3a3c; }
+
+        /* Contador de Caracteres Inferior */
+        .notes-footer {
+            padding: 10px 16px;
+            background-color: #121214;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 11px;
+            color: #8e8e93;
+            text-align: right;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- BARRA SUPERIOR DE ACCIONES -->
+    <div class="notes-header">
+        <div class="status-indicator" id="saveStatus">
+            <i class="fa-solid fa-cloud-check"></i> Listo
+        </div>
+        <button class="clear-btn" onclick="clearNote()" title="Borrar todo">
+            <i class="fa-solid fa-trash-can"></i> Limpiar Lienzo
+        </button>
+    </div>
+
+    <!-- LIENZO DE TEXTO LIBRE (ESTILO APPLE) -->
+    <div class="canvas-area">
+        <input type="text" id="noteTitle" class="note-title-input" placeholder="Título de la nota" oninput="triggerAutoSave()">
+        <textarea id="noteBody" class="note-textarea" placeholder="Empezá a escribir libremente acá..." oninput="triggerAutoSave()"></textarea>
+    </div>
+
+    <!-- PIE DE DETALLES -->
+    <div class="notes-footer" id="charCounter">
+        0 palabras · 0 caracteres
+    </div>
+
+    <!-- MOTOR DE PERSISTENCIA AUTOMÁTICA -->
+    <script>
+        let saveTimeout;
+
+        // Cargar datos guardados previamente de la memoria local
+        document.addEventListener("DOMContentLoaded", () => {
+            const savedTitle = localStorage.getItem('sik_quick_note_title') || '';
+            const savedBody = localStorage.getItem('sik_quick_note_body') || '';
+
+            document.getElementById('noteTitle').value = savedTitle;
+            document.getElementById('noteBody').value = savedBody;
+
+            updateMetrics();
+        });
+
+        // Lanzador del guardado inteligente (Debounce para no saturar memoria)
+        function triggerAutoSave() {
+            const status = document.getElementById('saveStatus');
+            status.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Guardando...`;
+            status.className = "status-indicator saving";
+
+            updateMetrics();
+
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+                const titleVal = document.getElementById('noteTitle').value;
+                const bodyVal = document.getElementById('noteBody').value;
+
+                localStorage.setItem('sik_quick_note_title', titleVal);
+                localStorage.setItem('sik_quick_note_body', bodyVal);
+
+                status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Guardado`;
+                status.className = "status-indicator saved";
+            }, 600); // Guarda automáticamente 600ms después de que dejas de teclear
+        }
+
+        // Contador de palabras y caracteres en tiempo real
+        function updateMetrics() {
+            const bodyText = document.getElementById('noteBody').value.trim();
+            const charCount = bodyText.length;
+            const wordCount = bodyText === "" ? 0 : bodyText.split(/\s+/).length;
+
+            document.getElementById('charCounter').innerText = `${wordCount} palabras · ${charCount} caracteres`;
+        }
+
+        // Limpiar el lienzo por completo
+        function clearNote() {
+            if(confirm("¿Querés vaciar esta nota por completo?")) {
+                document.getElementById('noteTitle').value = "";
+                document.getElementById('noteBody').value = "";
+                localStorage.removeItem('sik_quick_note_title');
+                localStorage.removeItem('sik_quick_note_body');
+                
+                const status = document.getElementById('saveStatus');
+                status.innerHTML = `<i class="fa-solid fa-cloud"></i> Vacío`;
+                status.className = "status-indicator";
+                updateMetrics();
+            }
+        }
+    </script>
+
+    <!-- EL MOTOR CENTRAL DEL MENÚ: Inyectará la barra lateral dinámicamente -->
+    <script src="sidebar.js"></script>
+</body>
+</html>

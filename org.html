@@ -185,7 +185,7 @@
             background: linear-gradient(145deg, rgba(28, 28, 30, 0.7) 0%, rgba(18, 18, 20, 0.9) 100%); border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.06); padding: 16px; position: relative; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
         }
         .client-card.expired-alert {
-            border: 1px solid rgba(255, 69, 58, 0.3); background: linear-gradient(145deg, rgba(28, 15, 15, 0.8) 0%, rgba(18, 10, 10, 0.9) 100%);
+            border: 1px solid rgba(255, 69, 58, 0.4) !important; background: linear-gradient(145deg, rgba(35, 12, 12, 0.85) 0%, rgba(20, 8, 8, 0.95) 100%) !important;
         }
         .card-top { display: flex; justify-content: space-between; align-items: flex-start; }
         .card-user-info { display: flex; flex-direction: column; gap: 4px; }
@@ -200,6 +200,17 @@
         .mini-ig svg { width: 10px; height: 10px; fill: currentColor; }
         .mini-wsp { display: inline-flex; align-items: center; background: rgba(48, 209, 88, 0.08); color: #30d158; padding: 2px 5px; border-radius: 4px; }
         .mini-wsp svg { width: 12px; height: 12px; fill: currentColor; }
+
+        /* --- BADGE DE VENCIMIENTO PREMIUM --- */
+        .expiry-display-tag {
+            font-size: 11px; font-weight: 600; color: #ff9f0a; background: rgba(255, 159, 10, 0.08); padding: 3px 8px; border-radius: 6px; display: inline-flex; align-items: center; gap: 5px; width: fit-content;
+        }
+        .expiry-display-tag.expired {
+            color: #ff453a; background: rgba(255, 69, 58, 0.12); font-weight: 700;
+        }
+        .expiry-display-tag.paid-clear {
+            color: #30d158; background: rgba(48, 209, 88, 0.08);
+        }
 
         .card-financial { text-align: right; }
         .price-display { font-size: 20px; font-weight: 800; color: #ff453a; letter-spacing: -0.5px; }
@@ -250,7 +261,7 @@
             <span></span>
         </button>
         <div class="brand-title">SIK</div>
-        <div style="width: 42px;"></div> <!-- Balanceador estético -->
+        <div style="width: 42px;"></div>
     </div>
 
     <!-- ESTRUCTURA DEL MENÚ DESPLEGABLE -->
@@ -291,7 +302,7 @@
     <!-- MINI BUSCADOR REAL-TIME -->
     <div class="search-container">
         <svg class="search-icon-mini" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-        <input type="text" id="miniSearch" class="search-input-mini" placeholder="Buscar por nombre, celu, DNI..." oninput="renderList()">
+        <input type="text" id="miniSearch" class="search-input-mini" placeholder="Buscar por nombre, celu, DNI, vencimiento..." oninput="renderList()">
     </div>
 
     <!-- SELECTOR DE SEGMENTOS CON CONTADORES DINÁMICOS -->
@@ -363,17 +374,23 @@
                         <input type="number" id="formWsp" class="form-control" placeholder="Ej. 2645890123" required>
                     </div>
                 </div>
+                <div class="form-row-double">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Fecha Vencimiento</label>
+                        <input type="date" id="formDueDate" class="form-control" required>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Estado Inicial</label>
+                        <select id="formStatus" class="form-control">
+                            <option value="deben">Debe</option>
+                            <option value="analisis" selected>En Análisis</option>
+                            <option value="pagado">Pagado</option>
+                        </select>
+                    </div>
+                </div>
                 <div class="form-group">
                     <label>Comentario o Promesa de Pago</label>
                     <input type="text" id="formPromise" class="form-control" placeholder="Paga hoy a la tarde...">
-                </div>
-                <div class="form-group">
-                    <label>Estado Inicial</label>
-                    <select id="formStatus" class="form-control">
-                        <option value="deben">Debe</option>
-                        <option value="analisis" selected>En Análisis</option>
-                        <option value="pagado">Pagado</option>
-                    </select>
                 </div>
                 <button type="submit" class="submit-btn">Cargar al Sistema</button>
             </form>
@@ -383,6 +400,26 @@
     <script>
         let clients = JSON.parse(localStorage.getItem('sik_clients')) || [];
         let currentFilter = 'todos';
+
+        // Helper para inicializar la fecha de vencimiento a 30 días automáticamente
+        function initDefaultDueDate() {
+            const date = new Date();
+            date.setDate(date.getDate() + 30);
+            const yyyy = date.getFullYear();
+            const mm = String(date.getMonth() + 1).padStart(2, '0');
+            const dd = String(date.getDate()).padStart(2, '0');
+            document.getElementById('formDueDate').value = `${yyyy}-${mm}-${dd}`;
+        }
+
+        // Formateador estético de fechas: "08 de junio"
+        function formatExpiryDate(dateStr) {
+            if(!dateStr) return '---';
+            const parts = dateStr.split('-');
+            if(parts.length !== 3) return dateStr;
+            const date = new Date(parts[0], parts[1] - 1, parts[2]);
+            const options = { day: '2-digit', month: 'long' };
+            return `Vence: ${date.toLocaleDateString('es-AR', options)}`;
+        }
 
         // --- SISTEMA DEL MENÚ LATERAL REAL-TIME ---
         function toggleSideMenu(open) {
@@ -413,8 +450,10 @@
         // --- LÓGICA DE OPERACIONES Y MÉTRICAS ---
         function toggleModal(show) {
             const modal = document.getElementById('txModal');
-            if(show) modal.classList.add('open');
-            else {
+            if(show) {
+                modal.classList.add('open');
+                initDefaultDueDate();
+            } else {
                 modal.classList.remove('open');
                 document.getElementById('txForm').reset();
                 document.getElementById('formAmount').value = "10000";
@@ -433,7 +472,8 @@
                 wsp: document.getElementById('formWsp').value || '',
                 amount: parseFloat(document.getElementById('formAmount').value),
                 promise: document.getElementById('formPromise').value || '',
-                status: document.getElementById('formStatus').value
+                status: document.getElementById('formStatus').value,
+                dueDate: document.getElementById('formDueDate').value 
             };
             clients.unshift(newClient);
             syncData();
@@ -442,7 +482,9 @@
 
         function updateStatus(id, newStatus) {
             clients = clients.map(c => {
-                if(c.id === id) c.status = newStatus;
+                if(c.id === id) {
+                    c.status = newStatus;
+                }
                 return c;
             });
             syncData();
@@ -485,13 +527,14 @@
         function updateSegmentCounters() {
             const searchVal = document.getElementById('miniSearch').value.toLowerCase().trim();
             
-            // Filtramos la base según el buscador actual para que los contadores sean precisos
             const matchesSearch = clients.filter(c => {
+                const prettyDate = formatExpiryDate(c.dueDate).toLowerCase();
                 return !searchVal || 
                        c.name.toLowerCase().includes(searchVal) || 
                        c.phone.includes(searchVal) || 
                        c.wsp.includes(searchVal) || 
                        c.dni.includes(searchVal) || 
+                       prettyDate.includes(searchVal) ||
                        c.promise.toLowerCase().includes(searchVal);
             });
 
@@ -518,12 +561,12 @@
             const searchVal = document.getElementById('miniSearch').value.toLowerCase().trim();
             container.innerHTML = "";
 
-            // Actualiza los badges numéricos arriba de las listas
             updateSegmentCounters();
 
             const filtered = clients.filter(c => {
                 const matchStatus = (currentFilter === 'todos' || c.status === currentFilter);
-                const matchQuery = !searchVal || c.name.toLowerCase().includes(searchVal) || c.phone.includes(searchVal) || c.wsp.includes(searchVal) || c.dni.includes(searchVal) || c.promise.toLowerCase().includes(searchVal);
+                const prettyDate = formatExpiryDate(c.dueDate).toLowerCase();
+                const matchQuery = !searchVal || c.name.toLowerCase().includes(searchVal) || c.phone.includes(searchVal) || c.wsp.includes(searchVal) || c.dni.includes(searchVal) || prettyDate.includes(searchVal) || c.promise.toLowerCase().includes(searchVal);
                 return matchStatus && matchQuery;
             });
 
@@ -532,13 +575,16 @@
                 return;
             }
 
-            const ahora = Date.now();
-            const limite24hs = 24 * 60 * 60 * 1000;
+            const hoyStr = new Date().toISOString().split('T')[0];
 
             filtered.forEach(c => {
                 const card = document.createElement('div');
                 card.className = 'client-card';
-                if (c.status === 'deben' && (ahora - c.timestamp) > limite24hs) card.classList.add('expired-alert');
+                
+                const estaVencido = c.dueDate && c.dueDate < hoyStr;
+                if (c.status === 'deben' && estaVencido) {
+                    card.classList.add('expired-alert');
+                }
 
                 let igClean = c.ig.trim().replace('@', '');
                 let igMarkup = c.ig ? `<a href="https://instagram.com/${igClean}" target="_blank" class="mini-ig"><svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>@${igClean}</a>` : '';
@@ -559,13 +605,29 @@
                     indicatorMarkup = `<div class="status-glow-dot analisis"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg> Análisis</div>`;
                 }
 
+                let expiryTagClass = 'expiry-display-tag';
+                if(c.status === 'pagado') expiryTagClass += ' paid-clear';
+                else if(estaVencido) expiryTagClass += ' expired';
+
+                let prettyExpiryLabel = formatExpiryDate(c.dueDate);
+                if(c.status === 'pagado') prettyExpiryLabel = "Liquidado";
+
                 let promiseBox = c.promise ? `<div class="card-bottom-promise"><svg viewBox="0 0 24 24"><path d="M16 12V4c0-1.1-.9-2-2-2H10c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h1v6l1 1 1-1v-6h1c1.1 0 2-.9 2-2z"/></svg><span>${c.promise}</span></div>` : '';
 
                 card.innerHTML = `
                     <div class="card-top">
                         <div class="card-user-info">
                             <div class="name-row"><span class="phone-tag">${c.phone}</span><span class="client-name">${c.name}</span></div>
-                            <div class="meta-row"><span class="mini-dni">DNI: ${c.dni}</span>${phoneDisplayMarkup}${igMarkup}${wspMarkup}</div>
+                            <div class="meta-row">
+                                <span class="mini-dni">DNI: ${c.dni}</span>
+                                ${phoneDisplayMarkup}${igMarkup}${wspMarkup}
+                            </div>
+                            <div style="margin-top: 4px;">
+                                <span class="${expiryTagClass}">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
+                                    ${prettyExpiryLabel}
+                                </span>
+                            </div>
                         </div>
                         <div class="card-financial"><div class="price-display ${moneyClass}">$${c.amount.toLocaleString('es-AR')}</div></div>
                     </div>

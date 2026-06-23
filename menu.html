@@ -278,11 +278,6 @@
             touch-action: none;
             transition: all 0.2s ease;
         }
-        .menu-item-row.system-locked {
-            border-color: rgba(142, 142, 147, 0.12);
-            background: rgba(142, 142, 147, 0.01);
-            touch-action: auto;
-        }
         .menu-item-row.dragging {
             opacity: 0.6;
             background: rgba(28, 28, 30, 0.95);
@@ -352,6 +347,7 @@
 </head>
 <body>
 
+    <!-- BARRA SUPERIOR -->
     <div class="top-navbar">
         <a href="org.html" class="back-btn">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
@@ -361,6 +357,7 @@
         <div style="width: 75px;"></div>
     </div>
 
+    <!-- PANEL DE KPIs -->
     <div class="kpi-grid">
         <div class="kpi-card"><div class="kpi-val" id="kpiActive">0</div><div class="kpi-lbl">Activas</div></div>
         <div class="kpi-card"><div class="kpi-val" id="kpiBypass">0</div><div class="kpi-lbl">Bypass</div></div>
@@ -371,8 +368,10 @@
         <h2 id="formTitle">Menú Operativo</h2>
         <div class="subtitle">Modificá parámetros de ruteo, duplicá arquitecturas o deslizá para ordenar.</div>
 
+        <!-- FORMULARIO CENTRAL -->
         <form class="menu-form" id="menuForm" onsubmit="saveMenuItem(event)">
             <input type="hidden" id="editingIndex" value="-1">
+            <input type="hidden" id="editingIsCore" value="false">
             
             <div class="form-row-upper">
                 <div style="display:flex; flex-direction:column; gap:6px;">
@@ -388,6 +387,7 @@
                 </div>
             </div>
 
+            <!-- EXPANSIÓN DE GALERÍA -->
             <div class="icon-dropdown-panel" id="iconDropdown">
                 <div class="icon-selector-grid">
                     <div class="premium-icon ic-chart selected" onclick="selectIcon('ic-chart', 'fa-solid fa-chart-pie')"><i class="fa-solid fa-chart-pie"></i></div>
@@ -419,6 +419,7 @@
             </div>
         </form>
 
+        <!-- CABECERA DE FILTRADO -->
         <div class="list-header-actions">
             <div class="items-title">Distribución Lateral</div>
             <input type="text" id="menuSearch" class="search-control" placeholder="🔍 Filtrar sección..." oninput="filterMenuItems()">
@@ -426,6 +427,7 @@
 
         <ul class="menu-items-list" id="menuItemsList"></ul>
 
+        <!-- SECCIÓN BACKUP -->
         <div class="backup-section">
             <button class="backup-btn" onclick="exportConfig()"><i class="fa-solid fa-download"></i> Exportar</button>
             <button class="backup-btn" onclick="document.getElementById('importFile').click()"><i class="fa-solid fa-upload"></i> Importar</button>
@@ -434,13 +436,16 @@
     </div>
 
     <script>
-        const coreLockedMenu = [
+        const defaultCoreMenu = [
             { label: "Dashboard", link: "org.html", iconClass: "ic-chart", iconText: "fa-solid fa-chart-pie", locked: true, active: true },
             { label: "Configurar Menú", link: "menu.html", iconClass: "ic-config", iconText: "fa-solid fa-sliders", locked: true, active: true }
         ];
 
         let currentClass = 'ic-chart';
         let currentIcon = 'fa-solid fa-chart-pie';
+        
+        // Carga el core personalizado de localStorage o usa el default si no existe
+        let coreMenu = JSON.parse(localStorage.getItem('sik_menu_items_core')) || defaultCoreMenu;
         let customMenuItems = JSON.parse(localStorage.getItem('sik_menu_items_custom')) || [];
 
         function toggleIconPanel() { document.getElementById('iconDropdown').classList.toggle('show'); }
@@ -469,7 +474,7 @@
         function renderMenuItems() {
             const listContainer = document.getElementById('menuItemsList');
             listContainer.innerHTML = "";
-            const completeDisplayList = [...coreLockedMenu, ...customMenuItems];
+            const completeDisplayList = [...coreMenu, ...customMenuItems];
             calculateKPIs(completeDisplayList);
 
             completeDisplayList.forEach((item, index) => {
@@ -479,77 +484,74 @@
                 
                 if(item.active === false) li.classList.add('disabled-state');
 
-                if(item.locked) {
-                    li.classList.add('system-locked');
-                    li.innerHTML = `
-                        <div class="item-main-info">
-                            <div class="item-icon-preview ${item.iconClass}"><i class="${item.iconText}"></i></div>
-                            <div class="item-text-details">
-                                <span class="item-label-txt">${item.label}</span>
-                                <span class="item-link-txt">${item.link}</span>
-                            </div>
+                const isCore = index < coreMenu.length;
+                const innerIndex = isCore ? index : index - coreMenu.length;
+                const isChecked = item.active !== false ? 'checked' : '';
+                
+                // Botón de eliminar solo para los personalizados
+                const deleteButtonHTML = !isCore ? `
+                    <button class="action-icon-btn delete" onclick="deleteMenuItem(${innerIndex})">
+                        <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                    </button>
+                ` : '';
+
+                li.innerHTML = `
+                    <div class="item-main-info">
+                        <div class="item-icon-preview ${item.iconClass}"><i class="${item.iconText}"></i></div>
+                        <div class="item-text-details">
+                            <span class="item-label-txt">${item.label}</span>
+                            <span class="item-link-txt">${item.link}</span>
                         </div>
-                        <div class="toggle-container"><span class="toggle-label" style="color:#30d158;">Core</span></div>
-                    `;
-                } else {
-                    const customIndex = index - coreLockedMenu.length;
-                    const isChecked = item.active !== false ? 'checked' : '';
-                    
-                    li.innerHTML = `
-                        <div class="item-main-info">
-                            <div class="item-icon-preview ${item.iconClass}"><i class="${item.iconText}"></i></div>
-                            <div class="item-text-details">
-                                <span class="item-label-txt">${item.label}</span>
-                                <span class="item-link-txt">${item.link}</span>
-                            </div>
+                    </div>
+                    <div class="row-controls">
+                        <div class="toggle-container">
+                            <span class="toggle-label">${item.active !== false ? 'ON' : 'OFF'}</span>
+                            <label class="switch">
+                                <input type="checkbox" ${isChecked} onchange="toggleItemActive(${isCore}, ${innerIndex}, this)">
+                                <span class="slider"></span>
+                            </label>
                         </div>
-                        <div class="row-controls">
-                            <div class="toggle-container">
-                                <span class="toggle-label">${item.active !== false ? 'ON' : 'OFF'}</span>
-                                <label class="switch">
-                                    <input type="checkbox" ${isChecked} onchange="toggleItemActive(${customIndex}, this)">
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                            <div class="action-buttons-wrap">
-                                <button class="action-icon-btn clone" onclick="cloneMenuItem(${customIndex})" title="Duplicar">
-                                    <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
-                                </button>
-                                <button class="action-icon-btn edit" onclick="editMenuItem(${customIndex})">
-                                    <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-                                </button>
-                                <button class="action-icon-btn delete" onclick="deleteMenuItem(${customIndex})">
-                                    <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
-                                </button>
-                            </div>
+                        <div class="action-buttons-wrap">
+                            <button class="action-icon-btn clone" onclick="cloneMenuItem(${isCore}, ${innerIndex})" title="Duplicar">
+                                <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                            </button>
+                            <button class="action-icon-btn edit" onclick="editMenuItem(${isCore}, ${innerIndex})">
+                                <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                            </button>
+                            ${deleteButtonHTML}
                         </div>
-                    `;
-                    setupTouchDrag(li, customIndex);
-                }
+                    </div>
+                `;
+                
+                if(!isCore) setupTouchDrag(li, innerIndex);
                 listContainer.appendChild(li);
             });
+            
+            // Guardamos la lista consolidada completa para que la consuman las demás páginas
             localStorage.setItem('sik_menu_items', JSON.stringify(completeDisplayList));
         }
 
-        function toggleItemActive(customIndex, checkbox) {
-            customMenuItems[customIndex].active = checkbox.checked;
-            localStorage.setItem('sik_menu_items_custom', JSON.stringify(customMenuItems));
+        function toggleItemActive(isCore, index, checkbox) {
+            if(isCore) {
+                coreMenu[index].active = checkbox.checked;
+                localStorage.setItem('sik_menu_items_core', JSON.stringify(coreMenu));
+            } else {
+                customMenuItems[index].active = checkbox.checked;
+                localStorage.setItem('sik_menu_items_custom', JSON.stringify(customMenuItems));
+            }
             renderMenuItems();
         }
 
-        /* --- FILTRADO INTELIGENTE --- */
         function filterMenuItems() {
             const query = document.getElementById('menuSearch').value.toLowerCase().trim();
             document.querySelectorAll('.menu-item-row').forEach(row => {
-                if(row.classList.contains('system-locked')) return;
                 const txt = row.getAttribute('data-label');
                 row.style.display = txt.includes(query) ? 'flex' : 'none';
             });
         }
 
-        /* --- FUNCIÓN CLONAR (1-CLICK) --- */
-        function cloneMenuItem(customIndex) {
-            const origin = customMenuItems[customIndex];
+        function cloneMenuItem(isCore, index) {
+            const origin = isCore ? coreMenu[index] : customMenuItems[index];
             const cloned = {
                 label: origin.label + " (Copia)",
                 link: "copia_" + origin.link,
@@ -563,14 +565,14 @@
             renderMenuItems();
         }
 
-        function setupTouchDrag(rowElement, customIndex) {
+        setupTouchDrag(rowElement, customIndex) {
             let startY = 0; let currentElementIndex = customIndex;
             rowElement.addEventListener('touchstart', e => {
                 startY = e.touches[0].clientY; rowElement.classList.add('dragging');
             }, { passive: true });
 
             rowElement.addEventListener('touchmove', e => {
-                if(document.getElementById('menuSearch').value !== "") return; // Bloquear drag al buscar
+                if(document.getElementById('menuSearch').value !== "") return;
                 const currentY = e.touches[0].clientY; const diff = currentY - startY;
 
                 if (diff > 45 && currentElementIndex < customMenuItems.length - 1) {
@@ -598,38 +600,58 @@
             const labelInput = document.getElementById('itemLabel');
             const linkInput = document.getElementById('itemLink');
             const editingIdx = parseInt(document.getElementById('editingIndex').value);
+            const isCoreEditing = document.getElementById('editingIsCore').value === "true";
 
             let targetLink = linkInput.value.trim();
             if(!targetLink.includes('.')) targetLink += '.html';
 
-            const itemData = {
-                label: labelInput.value.trim(), link: targetLink,
-                iconClass: currentClass, iconText: currentIcon, locked: false,
-                active: editingIdx === -1 ? true : (customMenuItems[editingIdx].active !== false)
-            };
+            if(editingIdx === -1) {
+                // Nuevo elemento personalizado
+                const itemData = {
+                    label: labelInput.value.trim(), link: targetLink,
+                    iconClass: currentClass, iconText: currentIcon, locked: false, active: true
+                };
+                customMenuItems.push(itemData);
+                localStorage.setItem('sik_menu_items_custom', JSON.stringify(customMenuItems));
+            } else {
+                // Modificación existente
+                if(isCoreEditing) {
+                    coreMenu[editingIdx].label = labelInput.value.trim();
+                    coreMenu[editingIdx].link = targetLink;
+                    coreMenu[editingIdx].iconClass = currentClass;
+                    coreMenu[editingIdx].iconText = currentIcon;
+                    localStorage.setItem('sik_menu_items_core', JSON.stringify(coreMenu));
+                } else {
+                    customMenuItems[editingIdx].label = labelInput.value.trim();
+                    customMenuItems[editingIdx].link = targetLink;
+                    customMenuItems[editingIdx].iconClass = currentClass;
+                    customMenuItems[editingIdx].iconText = currentIcon;
+                    localStorage.setItem('sik_menu_items_custom', JSON.stringify(customMenuItems));
+                }
+            }
 
-            if(editingIdx === -1) customMenuItems.push(itemData);
-            else customMenuItems[editingIdx] = itemData;
-
-            localStorage.setItem('sik_menu_items_custom', JSON.stringify(customMenuItems));
             resetForm(); renderMenuItems();
         }
 
-        function editMenuItem(customIndex) {
-            const item = customMenuItems[customIndex];
-            document.getElementById('editingIndex').value = customIndex;
+        function editMenuItem(isCore, index) {
+            const item = isCore ? coreMenu[index] : customMenuItems[index];
+            document.getElementById('editingIndex').value = index;
+            document.getElementById('editingIsCore').value = isCore ? "true" : "false";
+            
             document.getElementById('itemLabel').value = item.label;
             document.getElementById('itemLink').value = item.link;
-            document.getElementById('formTitle').innerText = "Modificar Sección";
+            document.getElementById('formTitle').innerText = isCore ? `Modificar Base: ${item.label}` : "Modificar Sección";
             document.getElementById('submitBtn').innerText = "Guardar Cambios";
             document.getElementById('submitBtn').style.backgroundColor = "#ffd60a";
             document.getElementById('cancelBtn').style.display = "block";
+            
             selectIcon(item.iconClass, item.iconText);
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function resetForm() {
             document.getElementById('editingIndex').value = "-1";
+            document.getElementById('editingIsCore').value = "false";
             document.getElementById('itemLabel').value = ""; document.getElementById('itemLink').value = "";
             document.getElementById('formTitle').innerText = "Menú Operativo";
             document.getElementById('submitBtn').innerText = "Agregar al Panel";
@@ -649,7 +671,8 @@
 
         /* --- EXPORTAR / IMPORTAR RESPALDOS --- */
         function exportConfig() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(customMenuItems, null, 2));
+            const backupData = { core: coreMenu, custom: customMenuItems };
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
             const downloadAnchor = document.createElement('a');
             downloadAnchor.setAttribute("href", dataStr);
             downloadAnchor.setAttribute("download", "sik_menu_backup.json");
@@ -665,11 +688,22 @@
             reader.onload = function(evt) {
                 try {
                     const parsed = JSON.parse(evt.target.result);
-                    if(Array.isArray(parsed)) {
+                    if(parsed && (parsed.core || parsed.custom)) {
+                        if(parsed.core) {
+                            coreMenu = parsed.core;
+                            localStorage.setItem('sik_menu_items_core', JSON.stringify(coreMenu));
+                        }
+                        if(parsed.custom) {
+                            customMenuItems = parsed.custom;
+                            localStorage.setItem('sik_menu_items_custom', JSON.stringify(customMenuItems));
+                        }
+                        renderMenuItems();
+                        alert("Estructura completa de SIK importada con éxito.");
+                    } else if(Array.isArray(parsed)) {
                         customMenuItems = parsed;
                         localStorage.setItem('sik_menu_items_custom', JSON.stringify(customMenuItems));
                         renderMenuItems();
-                        alert("Estructura de Menús de SIK cargada con éxito.");
+                        alert("Estructura personalizada importada con éxito.");
                     } else alert("Formato de backup inválido.");
                 } catch(err) { alert("Error al leer el archivo."); }
             };

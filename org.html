@@ -267,6 +267,7 @@
 </head>
 <body>
 
+    <!-- BARRA SUPERIOR -->
     <div class="top-navbar">
         <button class="hamburger-btn" onclick="toggleSideMenu(true)">
             <span></span>
@@ -277,6 +278,7 @@
         <div style="width: 42px;"></div>
     </div>
 
+    <!-- PANEL LATERAL DESPLEGABLE CON SINCRONIZACIÓN CORREGIDA -->
     <div class="side-menu-overlay" id="sideMenuOverlay" onclick="toggleSideMenu(false)">
         <div class="side-menu-content" onclick="event.stopPropagation()">
             <div class="menu-brand-header">
@@ -287,6 +289,7 @@
         </div>
     </div>
 
+    <!-- INDICADORES DIARIOS -->
     <div class="metrics-header">
         <div class="focus-row">
             <div class="label">Me puse en juego hoy</div>
@@ -310,11 +313,13 @@
         </div>
     </div>
 
+    <!-- BUSCADOR -->
     <div class="search-container">
         <svg class="search-icon-mini" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
         <input type="text" id="miniSearch" class="search-input-mini" placeholder="Buscar por nombre, celu, DNI, vencimiento..." oninput="renderList()">
     </div>
 
+    <!-- SEGMENTACIÓN -->
     <div class="segmented-control">
         <button class="segment-btn active" onclick="filterList('todos', this)">
             <span>Todos</span>
@@ -337,12 +342,15 @@
         </button>
     </div>
 
+    <!-- CONTENEDOR DE TARJETAS -->
     <div class="cards-container" id="cardsContainer"></div>
 
+    <!-- FAB CREAR -->
     <button class="fab" onclick="toggleModal(true)">
         <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
     </button>
 
+    <!-- FORMULARIO INGRESO -->
     <div class="modal" id="txModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -439,7 +447,7 @@
             return `(Faltan ${diffDays}d)`;
         }
 
-        // --- MANEJO DEL MENÚ LATERAL PROTEGIDO CONTRA UNDEFINED ---
+        // --- MANEJO DEL MENÚ LATERAL SINCRONIZADO COMO NOTA.HTML ---
         function toggleSideMenu(open) {
             const overlay = document.getElementById('sideMenuOverlay');
             if(open) {
@@ -453,21 +461,22 @@
         function renderSideMenuLinks() {
             const container = document.getElementById('sideMenuLinksContainer');
             
-            // Intentamos leer la configuración guardada por menu.html
-            let menuItems = JSON.parse(localStorage.getItem('sik_menu_items'));
+            // Cambiado exactamente a 'menuItems' para que lea lo mismo que nota.html y menu.html
+            let menuItems = JSON.parse(localStorage.getItem('menuItems'));
             
-            // Si está vacío, cargamos los accesos base automáticos de respaldo (Cero errores)
+            // Fallback por si la lista global está completamente limpia
             if (!menuItems || menuItems.length === 0) {
                 menuItems = [
-                    { label: "Dashboard", link: "org.html", icon: "📊" },
-                    { label: "Configurar Menú", link: "menu.html", icon: "⚙️" }
+                    { name: "Dashboard", url: "org.html", icon: "📊" },
+                    { name: "Configurar Menú", url: "menu.html", icon: "⚙️" }
                 ];
             }
             
+            // El mapeo ahora usa .url y .name como lo configuraste en tu archivo de menú
             container.innerHTML = menuItems.map(item => `
-                <a href="${item.link || '#'}">
+                <a href="${item.url || '#'}">
                     <span class="menu-icon-span">${item.icon || '📍'}</span>
-                    <span>${item.label || 'Enlace'}</span>
+                    <span>${item.name || 'Enlace'}</span>
                 </a>
             `).join('');
         }

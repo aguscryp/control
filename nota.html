@@ -6,37 +6,146 @@
     <title>SIK - Notas Rápidas</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* --- ESTÉTICA EXECUTIVO NOIR / APPLE STYLE --- */
+        /* --- ARQUITECTURA DE LAYOUT SIK --- */
+        :root {
+            --sidebar-width: 260px;
+        }
+        
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
 
         body {
             background-color: #000000;
             color: #ffffff;
-            letter-spacing: -0.2px;
-            height: 100vh;
             display: flex;
-            flex-direction: column;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        /* Contenedor Superior de Estado */
+        /* BARRA LATERAL COLAPSABLE EN MÓVIL */
+        .sik-sidebar {
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, #121214 0%, #000000 100%);
+            border-right: 1px solid rgba(255, 255, 255, 0.06);
+            display: flex;
+            flex-direction: column;
+            padding: 24px 16px;
+            position: fixed;
+            top: 0; bottom: 0; left: 0;
+            z-index: 100;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sik-brand {
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin-bottom: 32px;
+            padding-left: 8px;
+            color: #ffffff;
+        }
+
+        .sik-nav-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .sik-nav-item a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 12px;
+            color: #8e8e93;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        .sik-nav-item a:hover, .sik-nav-item.active a {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.03);
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+
+        /* DISEÑO DE ICONOS PREMIUM SIK */
+        .nav-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .ic-chart   { background: linear-gradient(135deg, #004757, #001f26); color: #64d2ff; }
+        .ic-wallet  { background: linear-gradient(135deg, #0b4622, #031409); color: #30d158; }
+        .ic-users   { background: linear-gradient(135deg, #441461, #1b052b); color: #bf5af2; }
+        .ic-target  { background: linear-gradient(135deg, #521616, #210505); color: #ff453a; }
+        .ic-cal     { background: linear-gradient(135deg, #523400, #241600); color: #ff9f0a; }
+        .ic-msg     { background: linear-gradient(135deg, #0a3361, #031429); color: #0a84ff; }
+        .ic-shield  { background: linear-gradient(135deg, #404043, #1c1c1e); color: #e5e5ea; }
+        .ic-bolt    { background: linear-gradient(135deg, #4d4400, #211d00); color: #ffd60a; }
+        .ic-folder  { background: linear-gradient(135deg, #422a14, #1f1205); color: #f5a623; }
+        .ic-link    { background: linear-gradient(135deg, #204857, #0b1e26); color: #70e0ff; }
+        .ic-key     { background: linear-gradient(135deg, #574d11, #211d04); color: #ffdf43; }
+        .ic-bell    { background: linear-gradient(135deg, #541d4b, #21041c); color: #ff6bf2; }
+        .ic-briefcase{ background: linear-gradient(135deg, #2d3b4d, #121921); color: #a2b5cd; }
+        .ic-terminal{ background: linear-gradient(135deg, #184734, #051a10); color: #43ff9f; }
+        .ic-config  { background: linear-gradient(135deg, #2c2c2e, #121214); color: #8e8e93; }
+
+        /* EL REY: BOTÓN HAMBURGUESA FLOTANTE */
+        .hamburger-btn {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: #1c1c1e;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+            color: #ffffff;
+            font-size: 18px;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 110;
+            transition: transform 0.2s;
+        }
+        .hamburger-btn:active { transform: scale(0.9); }
+
+        /* CONTENEDOR PRINCIPAL */
+        .sik-main-wrapper {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            min-width: 0;
+        }
+
+        /* --- INTERFAZ APP NOTAS --- */
         .notes-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 14px 16px;
+            padding: 14px 20px;
             background-color: rgba(0, 0, 0, 0.8);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            position: sticky;
-            top: 0;
-            z-index: 10;
         }
 
         .status-indicator {
@@ -49,7 +158,6 @@
             align-items: center;
             gap: 6px;
         }
-
         .status-indicator.saving { color: #ffd60a; }
         .status-indicator.saved { color: #30d158; }
 
@@ -62,34 +170,28 @@
             font-size: 12px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
         }
-        .clear-btn:active { transform: scale(0.95); }
 
-        /* Lienzo de Escritura Libre */
         .canvas-area {
             flex: 1;
-            padding: 24px 20px;
+            padding: 32px 24px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            overflow-y: auto;
+            gap: 16px;
         }
 
-        /* Título de la Nota */
         .note-title-input {
             width: 100%;
             background: transparent;
             border: 0;
             color: #ffffff;
-            font-size: 26px;
+            font-size: 28px;
             font-weight: 800;
             letter-spacing: -0.8px;
             outline: none;
         }
         .note-title-input::placeholder { color: #2c2c2e; }
 
-        /* Cuerpo de la Nota */
         .note-textarea {
             width: 100%;
             flex: 1;
@@ -97,63 +199,150 @@
             border: 0;
             color: #e5e5ea;
             font-size: 16px;
-            line-height: 1.5;
+            line-height: 1.6;
             resize: none;
             outline: none;
         }
         .note-textarea::placeholder { color: #3a3a3c; }
 
-        /* Contador de Caracteres Inferior */
         .notes-footer {
-            padding: 10px 16px;
+            padding: 10px 24px;
             background-color: #121214;
             border-top: 1px solid rgba(255, 255, 255, 0.05);
             font-size: 11px;
             color: #8e8e93;
             text-align: right;
-            font-weight: 500;
+        }
+
+        /* CAPA OSCURA DETRÁS DEL MENÚ EN MÓVIL */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 95;
+        }
+
+        /* --- RESPONSIVO ADAPTATIVO SIK --- */
+        @media (max-width: 768px) {
+            .sik-sidebar {
+                transform: translateX(-100%); /* Oculto por defecto */
+            }
+            .sik-sidebar.open {
+                transform: translateX(0); /* Desplegado */
+            }
+            .hamburger-btn {
+                display: flex; /* Aparece solo en celular */
+            }
+            .sidebar-overlay.show {
+                display: block;
+            }
+            .sik-main-wrapper {
+                margin-left: 0; /* Ocupa toda la pantalla */
+            }
+            .canvas-area {
+                padding: 20px 16px;
+            }
         }
     </style>
 </head>
 <body>
 
-    <!-- BARRA SUPERIOR DE ACCIONES -->
-    <div class="notes-header">
-        <div class="status-indicator" id="saveStatus">
-            <i class="fa-solid fa-cloud-check"></i> Listo
+    <!-- BOTÓN HAMBURGUESA FLOTANTE -->
+    <button class="hamburger-btn" id="menuToggle" onclick="toggleSidebar()">
+        <i class="fa-solid fa-bars" id="menuIcon"></i>
+    </button>
+
+    <!-- VELO DE FONDO EN MÓVIL -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <!-- MENÚ LATERAL -->
+    <aside class="sik-sidebar" id="sikSidebar">
+        <div class="sik-brand">SIK</div>
+        <ul class="sik-nav-list" id="sidebarNavList"></ul>
+    </aside>
+
+    <!-- ÁREA OPERATIVA DE CONTENIDO -->
+    <main class="sik-main-wrapper">
+        <div class="notes-header">
+            <div class="status-indicator" id="saveStatus">
+                <i class="fa-solid fa-cloud"></i> Listo
+            </div>
+            <button class="clear-btn" onclick="clearNote()">
+                <i class="fa-solid fa-trash-can"></i> Limpiar
+            </button>
         </div>
-        <button class="clear-btn" onclick="clearNote()" title="Borrar todo">
-            <i class="fa-solid fa-trash-can"></i> Limpiar Lienzo
-        </button>
-    </div>
 
-    <!-- LIENZO DE TEXTO LIBRE (ESTILO APPLE) -->
-    <div class="canvas-area">
-        <input type="text" id="noteTitle" class="note-title-input" placeholder="Título de la nota" oninput="triggerAutoSave()">
-        <textarea id="noteBody" class="note-textarea" placeholder="Empezá a escribir libremente acá..." oninput="triggerAutoSave()"></textarea>
-    </div>
+        <div class="canvas-area">
+            <input type="text" id="noteTitle" class="note-title-input" placeholder="Título de la nota" oninput="triggerAutoSave()">
+            <textarea id="noteBody" class="note-textarea" placeholder="Empezá a escribir libremente acá..." oninput="triggerAutoSave()"></textarea>
+        </div>
 
-    <!-- PIE DE DETALLES -->
-    <div class="notes-footer" id="charCounter">
-        0 palabras · 0 caracteres
-    </div>
+        <div class="notes-footer" id="charCounter">
+            0 palabras · 0 caracteres
+        </div>
+    </main>
 
-    <!-- MOTOR DE PERSISTENCIA AUTOMÁTICA -->
+    <!-- LÓGICA DE CONTROL DE LA INTERFAZ -->
     <script>
         let saveTimeout;
 
-        // Cargar datos guardados previamente de la memoria local
-        document.addEventListener("DOMContentLoaded", () => {
-            const savedTitle = localStorage.getItem('sik_quick_note_title') || '';
-            const savedBody = localStorage.getItem('sik_quick_note_body') || '';
+        // ACCIÓN DEL MENÚ HAMBURGUESA
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sikSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const icon = document.getElementById('menuIcon');
 
-            document.getElementById('noteTitle').value = savedTitle;
-            document.getElementById('noteBody').value = savedBody;
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('show');
+
+            if(sidebar.classList.contains('open')) {
+                icon.className = "fa-solid fa-xmark";
+            } else {
+                icon.className = "fa-solid fa-bars";
+            }
+        }
+
+        // CONSTRUCCIÓN ESTRUCTURAL DINÁMICA DEL MENÚ
+        function buildSidebar() {
+            const defaultMenu = [
+                { label: "Dashboard", link: "org.html", iconClass: "ic-chart", iconText: "fa-solid fa-chart-pie", active: true },
+                { label: "Configurar Menú", link: "menu.html", iconClass: "ic-config", iconText: "fa-solid fa-sliders", active: true }
+            ];
+            
+            const currentMenuItems = JSON.parse(localStorage.getItem('sik_menu_items')) || defaultMenu;
+            const container = document.getElementById('sidebarNavList');
+            container.innerHTML = "";
+
+            // Oculta de inmediato las secciones desactivadas en menu.html
+            const activeItems = currentMenuItems.filter(item => item.active !== false);
+
+            activeItems.forEach(item => {
+                const li = document.createElement('li');
+                const isActive = item.link === "nota.html" ? 'active' : '';
+                li.className = `sik-nav-item ${isActive}`;
+                
+                li.innerHTML = `
+                    <a href="${item.link}">
+                        <div class="nav-icon ${item.iconClass}"><i class="${item.iconText}"></i></div>
+                        <span>${item.label}</span>
+                    </a>
+                `;
+                container.appendChild(li);
+            });
+        }
+
+        // CARGA INICIAL Y AUTO-GUARDADO DE NOTA
+        document.addEventListener("DOMContentLoaded", () => {
+            buildSidebar();
+
+            document.getElementById('noteTitle').value = localStorage.getItem('sik_quick_note_title') || '';
+            document.getElementById('noteBody').value = localStorage.getItem('sik_quick_note_body') || '';
 
             updateMetrics();
         });
 
-        // Lanzador del guardado inteligente (Debounce para no saturar memoria)
         function triggerAutoSave() {
             const status = document.getElementById('saveStatus');
             status.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Guardando...`;
@@ -163,27 +352,21 @@
 
             clearTimeout(saveTimeout);
             saveTimeout = setTimeout(() => {
-                const titleVal = document.getElementById('noteTitle').value;
-                const bodyVal = document.getElementById('noteBody').value;
-
-                localStorage.setItem('sik_quick_note_title', titleVal);
-                localStorage.setItem('sik_quick_note_body', bodyVal);
+                localStorage.setItem('sik_quick_note_title', document.getElementById('noteTitle').value);
+                localStorage.setItem('sik_quick_note_body', document.getElementById('noteBody').value);
 
                 status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Guardado`;
                 status.className = "status-indicator saved";
-            }, 600); // Guarda automáticamente 600ms después de que dejas de teclear
+            }, 600);
         }
 
-        // Contador de palabras y caracteres en tiempo real
         function updateMetrics() {
             const bodyText = document.getElementById('noteBody').value.trim();
             const charCount = bodyText.length;
             const wordCount = bodyText === "" ? 0 : bodyText.split(/\s+/).length;
-
             document.getElementById('charCounter').innerText = `${wordCount} palabras · ${charCount} caracteres`;
         }
 
-        // Limpiar el lienzo por completo
         function clearNote() {
             if(confirm("¿Querés vaciar esta nota por completo?")) {
                 document.getElementById('noteTitle').value = "";
@@ -198,8 +381,5 @@
             }
         }
     </script>
-
-    <!-- EL MOTOR CENTRAL DEL MENÚ: Inyectará la barra lateral dinámicamente -->
-    <script src="sidebar.js"></script>
 </body>
 </html>

@@ -37,7 +37,6 @@
             color: #ffffff;
         }
 
-        /* --- BOTÓN HAMBURGUESA FLOTANTE --- */
         .hamburger-btn {
             background: rgba(28, 28, 30, 0.8);
             border: 1px solid rgba(255, 255, 255, 0.08);
@@ -61,7 +60,7 @@
             transition: all 0.2s ease;
         }
 
-        /* --- PANEL LATERAL DESPLEGABLE (MENU OVERLAY) --- */
+        /* --- PANEL LATERAL DESPLEGABLE --- */
         .side-menu-overlay {
             position: fixed;
             inset: 0;
@@ -111,7 +110,6 @@
         .menu-links-list a:active {
             background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.1);
         }
-        .menu-icon-span { font-size: 18px; }
 
         /* --- DASHBOARD DE OBJETIVOS DIARIOS --- */
         .metrics-header {
@@ -120,7 +118,6 @@
             border-radius: 20px;
             padding: 22px 20px;
             margin-bottom: 24px;
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
         }
@@ -137,7 +134,7 @@
         }
         .tx-counter-badge span { color: #64d2ff; }
         .metrics-header .total-revenue {
-            font-size: 42px; font-weight: 800; color: #ff453a; letter-spacing: -1.5px; text-shadow: 0 0 20px rgba(255, 69, 58, 0.15);
+            font-size: 42px; font-weight: 800; color: #ff453a; letter-spacing: -1.5px;
         }
         
         .goal-progress-bar {
@@ -177,12 +174,11 @@
         .segment-btn svg { width: 13px; height: 13px; fill: currentColor; }
         .segment-btn.active { background-color: #ffffff; color: #000000; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
         .segment-counter { font-size: 10px; font-weight: 700; opacity: 0.7; }
-        .segment-btn.active .segment-counter { opacity: 0.9; }
 
         /* --- CONTENEDOR DE TARJETAS --- */
         .cards-container { display: flex; flex-direction: column; gap: 14px; }
         .client-card {
-            background: linear-gradient(145deg, rgba(28, 28, 30, 0.7) 0%, rgba(18, 18, 20, 0.9) 100%); border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.06); padding: 16px; position: relative; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            background: linear-gradient(145deg, rgba(28, 28, 30, 0.7) 0%, rgba(18, 18, 20, 0.9) 100%); border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.06); padding: 16px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5); transition: border 0.2s;
         }
         .client-card.expired-alert {
             border: 1px solid rgba(255, 69, 58, 0.4) !important; background: linear-gradient(145deg, rgba(35, 12, 12, 0.85) 0%, rgba(20, 8, 8, 0.95) 100%) !important;
@@ -201,24 +197,42 @@
         .mini-wsp { display: inline-flex; align-items: center; background: rgba(48, 209, 88, 0.08); color: #30d158; padding: 2px 5px; border-radius: 4px; }
         .mini-wsp svg { width: 12px; height: 12px; fill: currentColor; }
 
-        /* --- BADGE DE VENCIMIENTO PREMIUM --- */
+        /* --- BADGE DE VENCIMIENTO PREMIUM CON CONTADOR --- */
         .expiry-display-tag {
             font-size: 11px; font-weight: 600; color: #ff9f0a; background: rgba(255, 159, 10, 0.08); padding: 3px 8px; border-radius: 6px; display: inline-flex; align-items: center; gap: 5px; width: fit-content;
         }
-        .expiry-display-tag.expired {
-            color: #ff453a; background: rgba(255, 69, 58, 0.12); font-weight: 700;
-        }
-        .expiry-display-tag.paid-clear {
-            color: #30d158; background: rgba(48, 209, 88, 0.08);
-        }
+        .expiry-display-tag .days-countdown { font-size: 10px; font-weight: 700; opacity: 0.8; margin-left: 2px; padding-left: 4px; border-left: 1px solid rgba(255,159,10,0.3); }
+        .expiry-display-tag.expired { color: #ff453a; background: rgba(255, 69, 58, 0.12); font-weight: 700; }
+        .expiry-display-tag.expired .days-countdown { border-left-color: rgba(255,69,58,0.3); color: #ff453a; }
+        .expiry-display-tag.paid-clear { color: #30d158; background: rgba(48, 209, 88, 0.08); }
 
         .card-financial { text-align: right; }
         .price-display { font-size: 20px; font-weight: 800; color: #ff453a; letter-spacing: -0.5px; }
         .price-display.analisis { color: #ff9f0a; }
-        .price-display.paid { color: #30d158; text-shadow: 0 0 15px rgba(48, 209, 88, 0.1); }
+        .price-display.paid { color: #30d158; }
 
-        .card-bottom-promise { background: rgba(255, 255, 255, 0.03); border-radius: 8px; padding: 6px 10px; font-size: 11px; color: #e5e5ea; font-weight: 500; display: flex; align-items: center; gap: 6px; border-left: 2px solid #bf94ff; }
-        .card-bottom-promise svg { width: 11px; height: 11px; fill: #bf94ff; flex-shrink: 0; }
+        /* --- NUEVA SECCIÓN: HISTORIAL DE NOTAS ULTRA-COMPACTO --- */
+        .notes-timeline-wrapper {
+            background: rgba(255, 255, 255, 0.015); border-radius: 8px; padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+        .timeline-item {
+            font-size: 11px; color: #d1d1d6; font-weight: 500; display: flex; align-items: flex-start; gap: 6px; line-height: 14px;
+        }
+        .timeline-date {
+            color: #8e8e93; font-weight: 700; font-family: monospace; white-space: nowrap; font-size: 10.5px;
+        }
+        
+        /* IN-CARD QUICK INPUT */
+        .quick-note-box {
+            display: flex; gap: 6px; width: 100%; margin-top: 2px;
+        }
+        .quick-note-input {
+            flex: 1; background: #1c1c1e; border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 8px; padding: 6px 10px; color: #ffffff; font-size: 11.5px; outline: none;
+        }
+        .quick-note-input::placeholder { color: #545456; }
+        .quick-note-btn {
+            background: #ffffff; color: #000000; border: none; width: 28px; height: 28px; border-radius: 8px; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; cursor: pointer;
+        }
 
         .card-actions-bar { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 10px; margin-top: 4px; }
         .status-select-premium { background: #1c1c1e; border: 1px solid rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 11.5px; font-weight: 600; padding: 6px 10px; border-radius: 8px; outline: none; }
@@ -253,7 +267,6 @@
 </head>
 <body>
 
-    <!-- BARRA SUPERIOR CON HAMBURGUESA -->
     <div class="top-navbar">
         <button class="hamburger-btn" onclick="toggleSideMenu(true)">
             <span></span>
@@ -264,7 +277,6 @@
         <div style="width: 42px;"></div>
     </div>
 
-    <!-- ESTRUCTURA DEL MENÚ DESPLEGABLE -->
     <div class="side-menu-overlay" id="sideMenuOverlay" onclick="toggleSideMenu(false)">
         <div class="side-menu-content" onclick="event.stopPropagation()">
             <div class="menu-brand-header">
@@ -275,7 +287,6 @@
         </div>
     </div>
 
-    <!-- CONTROL DIARIO DE OBJETIVOS -->
     <div class="metrics-header">
         <div class="focus-row">
             <div class="label">Me puse en juego hoy</div>
@@ -299,13 +310,11 @@
         </div>
     </div>
 
-    <!-- MINI BUSCADOR REAL-TIME -->
     <div class="search-container">
         <svg class="search-icon-mini" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
         <input type="text" id="miniSearch" class="search-input-mini" placeholder="Buscar por nombre, celu, DNI, vencimiento..." oninput="renderList()">
     </div>
 
-    <!-- SELECTOR DE SEGMENTOS CON CONTADORES DINÁMICOS -->
     <div class="segmented-control">
         <button class="segment-btn active" onclick="filterList('todos', this)">
             <span>Todos</span>
@@ -328,15 +337,12 @@
         </button>
     </div>
 
-    <!-- CONTENEDOR DE TARJETAS -->
     <div class="cards-container" id="cardsContainer"></div>
 
-    <!-- FAB ACCIÓN -->
     <button class="fab" onclick="toggleModal(true)">
         <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
     </button>
 
-    <!-- ACCION FORMULARIO SLIDE-UP -->
     <div class="modal" id="txModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -389,7 +395,7 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Comentario o Promesa de Pago</label>
+                    <label>Comentario o Promesa Inicial</label>
                     <input type="text" id="formPromise" class="form-control" placeholder="Paga hoy a la tarde...">
                 </div>
                 <button type="submit" class="submit-btn">Cargar al Sistema</button>
@@ -401,7 +407,6 @@
         let clients = JSON.parse(localStorage.getItem('sik_clients')) || [];
         let currentFilter = 'todos';
 
-        // Helper para inicializar la fecha de vencimiento a 30 días automáticamente
         function initDefaultDueDate() {
             const date = new Date();
             date.setDate(date.getDate() + 30);
@@ -411,7 +416,6 @@
             document.getElementById('formDueDate').value = `${yyyy}-${mm}-${dd}`;
         }
 
-        // Formateador estético de fechas: "08 de junio"
         function formatExpiryDate(dateStr) {
             if(!dateStr) return '---';
             const parts = dateStr.split('-');
@@ -421,7 +425,30 @@
             return `Vence: ${date.toLocaleDateString('es-AR', options)}`;
         }
 
-        // --- SISTEMA DEL MENÚ LATERAL REAL-TIME ---
+        // --- CALCULO ULTRA-EXACTO DEL DIAS DE ATRAZO / RESTANTES ---
+        function getCountdownLabel(dateStr, status) {
+            if (!dateStr || status === 'pagado') return '';
+            
+            const hoy = new Date();
+            hoy.setHours(0,0,0,0);
+            
+            const parts = dateStr.split('-');
+            const vencimiento = new Date(parts[0], parts[1] - 1, parts[2]);
+            vencimiento.setHours(0,0,0,0);
+            
+            const diffTime = vencimiento.getTime() - hoy.getTime();
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays === 0) {
+                return `(Vence Hoy)`;
+            } else if (diffDays < 0) {
+                return `(Atrasado ${Math.abs(diffDays)}d)`;
+            } else {
+                return `(Faltan ${diffDays}d)`;
+            }
+        }
+
+        // --- MANEJO DEL MENÚ LATERAL ---
         function toggleSideMenu(open) {
             const overlay = document.getElementById('sideMenuOverlay');
             if(open) {
@@ -438,7 +465,6 @@
                 { label: "Dashboard", link: "org.html", icon: "📊" },
                 { label: "Configurar Menú", link: "menu.html", icon: "⚙️" }
             ];
-
             container.innerHTML = menuItems.map(item => `
                 <a href="${item.link}">
                     <span class="menu-icon-span">${item.icon}</span>
@@ -447,7 +473,7 @@
             `).join('');
         }
 
-        // --- LÓGICA DE OPERACIONES Y MÉTRICAS ---
+        // --- MÓDULOS DE DATOS ---
         function toggleModal(show) {
             const modal = document.getElementById('txModal');
             if(show) {
@@ -462,6 +488,15 @@
 
         function saveClient(e) {
             e.preventDefault();
+            const initialNotes = [];
+            const firstPromise = document.getElementById('formPromise').value.trim();
+            
+            if (firstPromise) {
+                const date = new Date();
+                const cleanDateStr = `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}`;
+                initialNotes.push({ date: cleanDateStr, text: firstPromise });
+            }
+
             const newClient = {
                 id: Date.now(),
                 timestamp: Date.now(),
@@ -471,20 +506,37 @@
                 ig: document.getElementById('formIg').value || '',
                 wsp: document.getElementById('formWsp').value || '',
                 amount: parseFloat(document.getElementById('formAmount').value),
-                promise: document.getElementById('formPromise').value || '',
                 status: document.getElementById('formStatus').value,
-                dueDate: document.getElementById('formDueDate').value 
+                dueDate: document.getElementById('formDueDate').value,
+                notes: initialNotes  // Arreglo para ir apilando notas
             };
             clients.unshift(newClient);
             syncData();
             toggleModal(false);
         }
 
+        // AGREGAR UNA NOTA RÁPIDA DIRECTAMENTE EN LA TARJETA
+        function addQuickNote(clientId) {
+            const input = document.getElementById(`quick-input-${clientId}`);
+            const text = input.value.trim();
+            if(!text) return;
+
+            clients = clients.map(c => {
+                if(c.id === clientId) {
+                    if(!c.notes) c.notes = [];
+                    const date = new Date();
+                    const cleanDateStr = `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}`;
+                    c.notes.push({ date: cleanDateStr, text: text });
+                }
+                return c;
+            });
+            
+            syncData();
+        }
+
         function updateStatus(id, newStatus) {
             clients = clients.map(c => {
-                if(c.id === id) {
-                    c.status = newStatus;
-                }
+                if(c.id === id) c.status = newStatus;
                 return c;
             });
             syncData();
@@ -505,7 +557,6 @@
 
         function calculateMetrics() {
             let totalPlaced = 0; let totalRevenue = 0; let totalExpected = 0; let activeTxCount = 0;
-
             clients.forEach(c => {
                 if(c.status !== 'analisis') {
                     activeTxCount++;
@@ -514,39 +565,35 @@
                     if(c.status === 'pagado') totalRevenue += (c.amount * 2); 
                 }
             });
-
             document.getElementById('todayPlaced').innerText = `$${totalPlaced.toLocaleString('es-AR')}`;
             document.getElementById('txActiveCount').innerText = activeTxCount;
             document.getElementById('todayRevenue').innerText = `$${totalRevenue.toLocaleString('es-AR')}`;
             document.getElementById('totalExpected').innerText = `$${totalExpected.toLocaleString('es-AR')}`;
-
             let progressPercent = Math.min((activeTxCount / 10) * 100, 100);
             document.getElementById('goalProgress').style.width = `${progressPercent}%`;
         }
 
         function updateSegmentCounters() {
             const searchVal = document.getElementById('miniSearch').value.toLowerCase().trim();
-            
             const matchesSearch = clients.filter(c => {
                 const prettyDate = formatExpiryDate(c.dueDate).toLowerCase();
+                let matchNotes = false;
+                if(c.notes) {
+                    matchNotes = c.notes.some(n => n.text.toLowerCase().includes(searchVal));
+                }
                 return !searchVal || 
                        c.name.toLowerCase().includes(searchVal) || 
                        c.phone.includes(searchVal) || 
                        c.wsp.includes(searchVal) || 
                        c.dni.includes(searchVal) || 
                        prettyDate.includes(searchVal) ||
-                       c.promise.toLowerCase().includes(searchVal);
+                       matchNotes;
             });
 
-            const cTodos = matchesSearch.length;
-            const cDeben = matchesSearch.filter(c => c.status === 'deben').length;
-            const cPagados = matchesSearch.filter(c => c.status === 'pagado').length;
-            const cAnalisis = matchesSearch.filter(c => c.status === 'analisis').length;
-
-            document.getElementById('count-todos').innerText = cTodos;
-            document.getElementById('count-deben').innerText = cDeben;
-            document.getElementById('count-pagado').innerText = cPagados;
-            document.getElementById('count-analisis').innerText = cAnalisis;
+            document.getElementById('count-todos').innerText = matchesSearch.length;
+            document.getElementById('count-deben').innerText = matchesSearch.filter(c => c.status === 'deben').length;
+            document.getElementById('count-pagado').innerText = matchesSearch.filter(c => c.status === 'pagado').length;
+            document.getElementById('count-analisis').innerText = matchesSearch.filter(c => c.status === 'analisis').length;
         }
 
         function filterList(filter, btn) {
@@ -566,7 +613,11 @@
             const filtered = clients.filter(c => {
                 const matchStatus = (currentFilter === 'todos' || c.status === currentFilter);
                 const prettyDate = formatExpiryDate(c.dueDate).toLowerCase();
-                const matchQuery = !searchVal || c.name.toLowerCase().includes(searchVal) || c.phone.includes(searchVal) || c.wsp.includes(searchVal) || c.dni.includes(searchVal) || prettyDate.includes(searchVal) || c.promise.toLowerCase().includes(searchVal);
+                let matchNotes = false;
+                if(c.notes) {
+                    matchNotes = c.notes.some(n => n.text.toLowerCase().includes(searchVal));
+                }
+                const matchQuery = !searchVal || c.name.toLowerCase().includes(searchVal) || c.phone.includes(searchVal) || c.wsp.includes(searchVal) || c.dni.includes(searchVal) || prettyDate.includes(searchVal) || matchNotes;
                 return matchStatus && matchQuery;
             });
 
@@ -609,10 +660,21 @@
                 if(c.status === 'pagado') expiryTagClass += ' paid-clear';
                 else if(estaVencido) expiryTagClass += ' expired';
 
-                let prettyExpiryLabel = formatExpiryDate(c.dueDate);
-                if(c.status === 'pagado') prettyExpiryLabel = "Liquidado";
+                // Render de fecha más el contador dinámico de días
+                let countdownTxt = getCountdownLabel(c.dueDate, c.status);
+                let prettyExpiryLabel = c.status === 'pagado' ? "Liquidado" : `${formatExpiryDate(c.dueDate)} <span class="days-countdown">${countdownTxt}</span>`;
 
-                let promiseBox = c.promise ? `<div class="card-bottom-promise"><svg viewBox="0 0 24 24"><path d="M16 12V4c0-1.1-.9-2-2-2H10c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h1v6l1 1 1-1v-6h1c1.1 0 2-.9 2-2z"/></svg><span>${c.promise}</span></div>` : '';
+                // Renderizado del historial de notas
+                let notesTimelineMarkup = '';
+                if(c.notes && c.notes.length > 0) {
+                    const itemsHtml = c.notes.map(n => `
+                        <div class="timeline-item">
+                            <span class="timeline-date">${n.date}:</span>
+                            <span>${n.text}</span>
+                        </div>
+                    `).join('');
+                    notesTimelineMarkup = `<div class="notes-timeline-wrapper">${itemsHtml}</div>`;
+                }
 
                 card.innerHTML = `
                     <div class="card-top">
@@ -631,7 +693,14 @@
                         </div>
                         <div class="card-financial"><div class="price-display ${moneyClass}">$${c.amount.toLocaleString('es-AR')}</div></div>
                     </div>
-                    ${promiseBox}
+                    
+                    ${notesTimelineMarkup}
+
+                    <div class="quick-note-box">
+                        <input type="text" id="quick-input-${c.id}" class="quick-note-input" placeholder="Agregar nota rápida o promesa...">
+                        <button class="quick-note-btn" onclick="addQuickNote(${c.id})">+</button>
+                    </div>
+
                     <div class="card-actions-bar">
                         <select class="status-select-premium" onchange="updateStatus(${c.id}, this.value)">
                             <option value="deben" ${c.status === 'deben' ? 'selected' : ''}>Marcar Debe</option>

@@ -18,39 +18,116 @@
         body {
             background-color: #000000;
             color: #ffffff;
-            padding: 20px 16px;
+            padding: 75px 16px 20px 16px; /* Ajuste por barra superior fija */
             letter-spacing: -0.2px;
         }
 
+        /* --- NAVBAR SUPERIOR FIJO --- */
         .top-navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 20px;
+            padding: 0 16px;
+            z-index: 1000;
         }
 
-        .back-btn {
-            background: rgba(28, 28, 30, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+        .menu-hamburger-btn {
+            background: transparent;
+            border: 0;
             color: #ffffff;
-            padding: 10px 16px;
-            border-radius: 12px;
-            font-size: 13px;
-            font-weight: 600;
-            text-decoration: none;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            font-size: 20px;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
             display: flex;
             align-items: center;
-            gap: 6px;
+            justify-content: flex-start;
         }
 
         .brand-title {
             font-size: 16px;
             font-weight: 700;
             letter-spacing: -0.3px;
-            color: #8e8e93;
+            color: #ffffff;
         }
+
+        .navbar-right-space {
+            width: 40px;
+        }
+
+        /* --- SIK SIDEBAR (MENÚ LATERAL) --- */
+        .sik-sidebar {
+            position: fixed;
+            top: 0;
+            left: -280px;
+            width: 280px;
+            height: 100%;
+            background: rgba(18, 18, 20, 0.98);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 20px 0 40px rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+        }
+        .sik-sidebar.open {
+            transform: translateX(280px);
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 32px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .sidebar-brand { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
+        .close-sidebar-btn { background: transparent; border: 0; color: #8e8e93; font-size: 18px; cursor: pointer; }
+
+        .sidebar-menu-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+        .sidebar-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+        .sidebar-menu-item:active { background: rgba(255, 255, 255, 0.05); }
+        .sidebar-menu-item.active {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .sidebar-icon-wrap {
+            width: 32px; height: 32px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center; font-size: 13px;
+        }
+
+        .sidebar-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4); backdrop-filter: blur(4px);
+            display: none; z-index: 1500;
+        }
+        .sidebar-overlay.show { display: block; }
 
         /* --- DASHBOARD DE MÉTRICAS (KPIs) --- */
         .kpi-grid {
@@ -347,15 +424,28 @@
 </head>
 <body>
 
+    <!-- NAVBAR SUPERIOR -->
     <div class="top-navbar">
-        <a href="org.html" class="back-btn">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
-            Volver
-        </a>
-        <div class="brand-title">Estructura SIK</div>
-        <div style="width: 75px;"></div>
+        <button class="menu-hamburger-btn" onclick="openSidebar()">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+        <div class="brand-title">Configurar Menú</div>
+        <div class="navbar-right-space"></div>
     </div>
 
+    <!-- OVERLAY Y SIDEBAR DINÁMICO -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+    <div class="sik-sidebar" id="sikSidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-brand">SIK</div>
+            <button class="close-sidebar-btn" onclick="closeSidebar()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <ul class="sidebar-menu-list" id="sidebarMenuList">
+            <!-- Render dinámico desde script -->
+        </ul>
+    </div>
+
+    <!-- PANEL DE KPIs -->
     <div class="kpi-grid">
         <div class="kpi-card"><div class="kpi-val" id="kpiActive">0</div><div class="kpi-lbl">Activas</div></div>
         <div class="kpi-card"><div class="kpi-val" id="kpiBypass">0</div><div class="kpi-lbl">Bypass</div></div>
@@ -366,6 +456,7 @@
         <h2 id="formTitle">Menú Operativo</h2>
         <div class="subtitle">Modificá parámetros de ruteo, duplicá arquitecturas o deslizá para ordenar.</div>
 
+        <!-- FORMULARIO CENTRAL -->
         <form class="menu-form" id="menuForm" onsubmit="saveMenuItem(event)">
             <input type="hidden" id="editingIndex" value="-1">
             <input type="hidden" id="editingIsCore" value="false">
@@ -384,6 +475,7 @@
                 </div>
             </div>
 
+            <!-- EXPANSIÓN DE GALERÍA -->
             <div class="icon-dropdown-panel" id="iconDropdown">
                 <div class="icon-selector-grid">
                     <div class="premium-icon ic-chart selected" onclick="selectIcon('ic-chart', 'fa-solid fa-chart-pie')"><i class="fa-solid fa-chart-pie"></i></div>
@@ -415,6 +507,7 @@
             </div>
         </form>
 
+        <!-- CABECERA DE FILTRADO -->
         <div class="list-header-actions">
             <div class="items-title">Distribución Lateral</div>
             <input type="text" id="menuSearch" class="search-control" placeholder="🔍 Filtrar sección..." oninput="filterMenuItems()">
@@ -422,6 +515,7 @@
 
         <ul class="menu-items-list" id="menuItemsList"></ul>
 
+        <!-- SECCIÓN BACKUP -->
         <div class="backup-section">
             <button class="backup-btn" onclick="exportConfig()"><i class="fa-solid fa-download"></i> Exportar</button>
             <button class="backup-btn" onclick="document.getElementById('importFile').click()"><i class="fa-solid fa-upload"></i> Importar</button>
@@ -429,6 +523,7 @@
         </div>
     </div>
 
+    <!-- MOTOR LÓGICO INTEGRADO -->
     <script>
         const defaultCoreMenu = [
             { label: "Dashboard", link: "org.html", iconClass: "ic-chart", iconText: "fa-solid fa-chart-pie", locked: true, active: true },
@@ -441,6 +536,41 @@
         let coreMenu = JSON.parse(localStorage.getItem('sik_menu_items_core')) || defaultCoreMenu;
         let customMenuItems = JSON.parse(localStorage.getItem('sik_menu_items_custom')) || [];
 
+        // --- NAVEGACIÓN SIDEBAR ---
+        function openSidebar() {
+            document.getElementById('sikSidebar').classList.add('open');
+            document.getElementById('sidebarOverlay').classList.add('show');
+            buildSidebarMenu();
+        }
+
+        function closeSidebar() {
+            document.getElementById('sikSidebar').classList.remove('open');
+            document.getElementById('sidebarOverlay').classList.remove('show');
+        }
+
+        function buildSidebarMenu() {
+            const completeList = [...coreMenu, ...customMenuItems];
+            const container = document.getElementById('sidebarMenuList');
+            container.innerHTML = "";
+
+            completeList.forEach(item => {
+                if(item.active === false) return;
+                const li = document.createElement('li');
+                const isCurrentPage = item.link === "menu.html";
+
+                li.innerHTML = `
+                    <a href="${item.link}" class="sidebar-menu-item ${isCurrentPage ? 'active' : ''}">
+                        <div class="sidebar-icon-wrap ${item.iconClass || 'ic-chart'}">
+                            <i class="${item.iconText || 'fa-solid fa-chart-pie'}"></i>
+                        </div>
+                        <span>${item.label}</span>
+                    </a>
+                `;
+                container.appendChild(li);
+            });
+        }
+
+        // --- PANEL DE ÍCONOS ---
         function toggleIconPanel() { document.getElementById('iconDropdown').classList.toggle('show'); }
 
         function selectIcon(cssClass, iconStr) {
@@ -698,7 +828,9 @@
             reader.readAsText(file);
         }
 
+        // Ejecuciones iniciales
         renderMenuItems();
+        buildSidebarMenu();
     </script>
 </body>
 </html>

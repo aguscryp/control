@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>SIK - Caja Fuerte de Ahorro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* --- ESTÉTICA CYBER-EXECUTIVE NOIR --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            padding: 75px 16px 20px 16px;
+            letter-spacing: -0.2px;
+        }
+
+        /* --- NAVBAR SUPERIOR FIJO --- */
+        .top-navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 1000;
+        }
+
+        .menu-hamburger-btn {
+            background: transparent;
+            border: 0;
+            color: #ffffff;
+            font-size: 20px;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        .brand-title {
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            color: #ffffff;
+        }
+
+        .navbar-right-space { width: 40px; }
+
+        /* --- SIK SIDEBAR (MENÚ LATERAL) --- */
+        .sik-sidebar {
+            position: fixed;
+            top: 0;
+            left: -280px;
+            width: 280px;
+            height: 100%;
+            background: rgba(18, 18, 20, 0.98);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 20px 0 40px rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+        }
+        .sik-sidebar.open { transform: translateX(280px); }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 32px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .sidebar-brand { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
+        .close-sidebar-btn { background: transparent; border: 0; color: #8e8e93; font-size: 18px; cursor: pointer; }
+
+        .sidebar-menu-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+        .sidebar-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+        .sidebar-menu-item.active {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .sidebar-icon-wrap {
+            width: 32px; height: 32px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center; font-size: 13px;
+        }
+        .ic-vault { background: linear-gradient(135deg, #1d4ed8, #1e3a8a); color: #60a5fa; }
+        .ic-chart { background: linear-gradient(135deg, #004757, #001f26); color: #64d2ff; }
+        .ic-config { background: linear-gradient(135deg, #2c2c2e, #121214); color: #8e8e93; }
+
+        .sidebar-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4); backdrop-filter: blur(4px);
+            display: none; z-index: 1500;
+        }
+        .sidebar-overlay.show { display: block; }
+
+        /* --- DASHBOARD METRICAS DE AHORRO --- */
+        .vault-hero {
+            background: linear-gradient(135deg, #111 0%, #1c1c1e 100%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            padding: 24px 16px;
+            text-align: center;
+            margin-bottom: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+        }
+
+        .vault-total { font-size: 36px; font-weight: 900; color: #30d158; letter-spacing: -1px; margin-top: 4px; }
+        .vault-target-lbl { font-size: 11px; color: #8e8e93; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
+
+        .kpi-mini-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .kpi-mini-card {
+            background: rgba(28, 28, 30, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 14px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .kpi-mini-val { font-size: 16px; font-weight: 800; }
+        .kpi-mini-lbl { font-size: 9px; color: #8e8e93; text-transform: uppercase; font-weight: 700; }
+
+        /* --- PANELES OPERATIVOS --- */
+        .workspace-card {
+            background: linear-gradient(145deg, rgba(28, 28, 30, 0.5) 0%, rgba(18, 18, 20, 0.7) 100%);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 18px;
+            margin-bottom: 20px;
+        }
+
+        .action-triggers {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .btn-op {
+            border: 0; padding: 14px; border-radius: 12px; font-size: 14px; font-weight: 700;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: transform 0.1s;
+        }
+        .btn-op:active { transform: scale(0.96); }
+        .btn-deposit { background-color: #ffffff; color: #000000; }
+        .btn-withdraw { background-color: #1c1c1e; color: #ff453a; border: 1px solid rgba(255, 69, 58, 0.2); }
+
+        /* --- FORMULARIOS DESPLEGABLES MODAL/PANEL --- */
+        .transaction-panel {
+            display: none;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            padding-top: 16px;
+            margin-top: 10px;
+            animation: fadeIn 0.2s ease;
+        }
+        .transaction-panel.show { display: block; }
+
+        .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+        label { font-size: 10px; color: #aeaeae; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
+        
+        .form-control {
+            width: 100%; background-color: #1c1c1e; border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px; padding: 12px; color: #ffffff; font-size: 14px; outline: none;
+        }
+
+        .submit-btn-panel {
+            width: 100%; border: 0; padding: 12px; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer;
+        }
+        .submit-btn-panel.dep { background-color: #30d158; color: #ffffff; }
+        .submit-btn-panel.wit { background-color: #ff453a; color: #ffffff; }
+
+        /* --- HISTORIAL DE TRANSACCIONES --- */
+        .history-title-bar {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
+        }
+        h3 { font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: #8e8e93; }
+        
+        .history-list { list-style: none; display: flex; flex-direction: column; gap: 10px; max-height: 350px; overflow-y: auto; }
+        .history-row {
+            display: flex; align-items: center; justify-content: space-between;
+            background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04);
+            padding: 12px; border-radius: 12px;
+        }
+        .row-left { display: flex; align-items: center; gap: 12px; }
+        .badge-icon {
+            width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px;
+        }
+        .badge-dep { background: rgba(48, 209, 88, 0.1); color: #30d158; }
+        .badge-wit { background: rgba(255, 69, 58, 0.1); color: #ff453a; }
+        
+        .meta-details { display: flex; flex-direction: column; gap: 1px; }
+        .meta-top { font-size: 13px; font-weight: 600; color: #ffffff; }
+        .meta-bottom { font-size: 10px; color: #8e8e93; font-family: monospace; }
+        .meta-note { font-size: 11px; color: #aeaeae; margin-top: 2px; font-style: italic; }
+
+        .row-right { text-align: right; font-size: 15px; font-weight: 800; }
+        .amt-dep { color: #30d158; }
+        .amt-wit { color: #ff453a; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR SUPERIOR -->
+    <div class="top-navbar">
+        <button class="menu-hamburger-btn" onclick="openSidebar()">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+        <div class="brand-title">Caja Encintada ($20k/Día)</div>
+        <div class="navbar-right-space"></div>
+    </div>
+
+    <!-- OVERLAY Y SIDEBAR -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+    <div class="sik-sidebar" id="sikSidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-brand">SIK</div>
+            <button class="close-sidebar-btn" onclick="closeSidebar()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <ul class="sidebar-menu-list" id="sidebarMenuList">
+            <!-- Render dinámico desde localStorage -->
+        </ul>
+    </div>
+
+    <!-- HERO DE MÉTRIAS PRINCIPALES -->
+    <div class="vault-hero">
+        <div class="vault-target-lbl">Balance Actual en Caja</div>
+        <div class="vault-total" id="txtTotalAcumulado">$0</div>
+    </div>
+
+    <!-- MINI KPIS AUXILIARES -->
+    <div class="kpi-mini-grid">
+        <div class="kpi-mini-card">
+            <span class="kpi-mini-val" id="txtDiasGuardados">0 días</span>
+            <span class="kpi-mini-lbl">Depósitos Totales</span>
+        </div>
+        <div class="kpi-mini-card">
+            <span class="kpi-mini-val" id="txtUltimoMovimiento">--:--</span>
+            <span class="kpi-mini-lbl">Último Registro</span>
+        </div>
+    </div>
+
+    <!-- BOTONES DE FLUJO OPERATIVO -->
+    <div class="action-triggers">
+        <button class="btn-op btn-deposit" onclick="openPanel('deposit')">
+            <i class="fa-solid fa-square-plus"></i> Guardar $20k
+        </button>
+        <button class="btn-op btn-withdraw" onclick="openPanel('withdraw')">
+            <i class="fa-solid fa-money-bill-transfer"></i> Retiro
+        </button>
+    </div>
+
+    <!-- PANEL DINÁMICO DE TRANSACCIÓN -->
+    <div class="workspace-card transaction-panel" id="actionPanel">
+        <h2 id="panelTitle" style="font-size: 16px; margin-bottom: 12px;">Operación</h2>
+        <form id="vaultForm" onsubmit="executeTransaction(event)">
+            <input type="hidden" id="txType" value="deposit">
+            
+            <div class="form-group">
+                <label>Monto ($)</label>
+                <input type="number" id="txAmount" class="form-control" value="20000" min="1" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Detalle / Nota Específica</label>
+                <input type="text" id="txNote" class="form-control" placeholder="Ej. Cumpliendo meta diaria, compra mercadería, etc.">
+            </div>
+
+            <button type="submit" class="submit-btn-panel dep" id="txSubmitBtn">Confirmar Ingreso</button>
+        </form>
+    </div>
+
+    <!-- HISTORIAL COMPLETO DE MOVIMIENTOS -->
+    <div class="workspace-card">
+        <div class="history-title-bar">
+            <h3>Auditoría de Caja</h3>
+        </div>
+        <ul class="history-list" id="historyLayout">
+            <!-- Inyección de filas dinámica -->
+        </ul>
+    </div>
+
+    <!-- INFRAESTRUCTURA LÓGICA -->
+    <script>
+        let vaultHistory = JSON.parse(localStorage.getItem('sik_vault_history')) || [];
+
+        // --- ENRUTADOR DE ACCIONES ---
+        function openPanel(type) {
+            const panel = document.getElementById('actionPanel');
+            const title = document.getElementById('panelTitle');
+            const amtInput = document.getElementById('txAmount');
+            const btn = document.getElementById('txSubmitBtn');
+            const txType = document.getElementById('txType');
+
+            txType.value = type;
+            panel.classList.add('show');
+
+            if(type === 'deposit') {
+                title.innerText = "Registrar Depósito Diario";
+                amtInput.value = "20000";
+                btn.innerText = "Confirmar Ingreso a Caja";
+                btn.className = "submit-btn-panel dep";
+            } else {
+                title.innerText = "Registrar Retiro de Emergencia / Uso";
+                amtInput.value = "";
+                amtInput.placeholder = "Monto a retirar";
+                btn.innerText = "Confirmar Extracción";
+                btn.className = "submit-btn-panel wit";
+            }
+            window.scrollTo({ top: panel.offsetTop - 20, behavior: 'smooth' });
+        }
+
+        // --- ENTRADA DE INFORMACIÓN INTEGRAL ---
+        function executeTransaction(e) {
+            e.preventDefault();
+            const type = document.getElementById('txType').value;
+            const amount = parseFloat(document.getElementById('txAmount').value);
+            const note = document.getElementById('txNote').value.trim();
+
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            const timeStr = now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+            const itemLog = {
+                id: Date.now(),
+                type: type,
+                amount: amount,
+                note: note || (type === 'deposit' ? "Meta Diaria Asegurada" : "Retiro sin especificar"),
+                date: dateStr,
+                time: timeStr
+            };
+
+            vaultHistory.unshift(itemLog);
+            localStorage.setItem('sik_vault_history', JSON.stringify(vaultHistory));
+
+            document.getElementById('txNote').value = "";
+            document.getElementById('actionPanel').classList.remove('show');
+            
+            renderVault();
+        }
+
+        // --- RENDERIZADO GENERAL ---
+        function renderVault() {
+            let total = 0;
+            let totalDepositsCount = 0;
+            const historyContainer = document.getElementById('historyLayout');
+            historyContainer.innerHTML = "";
+
+            if(vaultHistory.length === 0) {
+                historyContainer.innerHTML = `<li style="font-size:12px; color:#555559; text-align:center; padding: 20px;">Sin registros en esta caja fuerte.</li>`;
+                document.getElementById('txtTotalAcumulado').innerText = "$0";
+                document.getElementById('txtDiasGuardados').innerText = "0 días";
+                document.getElementById('txtUltimoMovimiento').innerText = "--:--";
+                return;
+            }
+
+            vaultHistory.forEach(log => {
+                if(log.type === 'deposit') {
+                    total += log.amount;
+                    totalDepositsCount++;
+                } else {
+                    total -= log.amount;
+                }
+
+                const li = document.createElement('li');
+                li.className = "history-row";
+                
+                const isDep = log.type === 'deposit';
+
+                li.innerHTML = `
+                    <div class="row-left">
+                        <div class="badge-icon ${isDep ? 'badge-dep' : 'badge-wit'}">
+                            <i class="${isDep ? 'fa-solid fa-arrow-turn-down' : 'fa-solid fa-arrow-turn-up'}"></i>
+                        </div>
+                        <div class="meta-details">
+                            <span class="meta-top">${isDep ? 'Depósito' : 'Retiro'}</span>
+                            <span class="meta-bottom">${log.date} a las ${log.time}</span>
+                            <span class="meta-note">${log.note}</span>
+                        </div>
+                    </div>
+                    <div class="row-right ${isDep ? 'amt-dep' : 'amt-wit'}">
+                        ${isDep ? '+' : '-'}$${log.amount.toLocaleString('es-AR')}
+                    </div>
+                `;
+                historyContainer.appendChild(li);
+            });
+
+            // Setear Métricas en pantalla
+            document.getElementById('txtTotalAcumulado').innerText = `$${total.toLocaleString('es-AR')}`;
+            document.getElementById('txtDiasGuardados').innerText = `${totalDepositsCount} ${totalDepositsCount === 1 ? 'día' : 'días'}`;
+            document.getElementById('txtUltimoMovimiento').innerText = `${vaultHistory[0].time.substring(0,5)} hs`;
+        }
+
+        // --- SIDEBAR INTEGRAL ---
+        function openSidebar() {
+            document.getElementById('sikSidebar').classList.add('open');
+            document.getElementById('sidebarOverlay').classList.add('show');
+        }
+
+        function closeSidebar() {
+            document.getElementById('sikSidebar').classList.remove('open');
+            document.getElementById('sidebarOverlay').classList.remove('show');
+        }
+
+        function buildSidebarMenu() {
+            const defaultCoreMenu = [
+                { label: "Dashboard", link: "org.html", iconClass: "ic-chart", iconText: "fa-solid fa-chart-pie", active: true },
+                { label: "Configurar Menú", link: "menu.html", iconClass: "ic-config", iconText: "fa-solid fa-sliders", active: true }
+            ];
+            const coreMenu = JSON.parse(localStorage.getItem('sik_menu_items_core')) || defaultCoreMenu;
+            const customMenu = JSON.parse(localStorage.getItem('sik_menu_items_custom')) || [];
+            const completeList = [...coreMenu, ...customMenu];
+
+            const container = document.getElementById('sidebarMenuList');
+            container.innerHTML = "";
+
+            completeList.forEach(item => {
+                if(item.active === false) return;
+                const li = document.createElement('li');
+                const isCurrentPage = item.link === "ahorro.html";
+
+                li.innerHTML = `
+                    <a href="${item.link}" class="sidebar-menu-item ${isCurrentPage ? 'active' : ''}">
+                        <div class="sidebar-icon-wrap ${item.iconClass || 'ic-chart'}">
+                            <i class="${item.iconText || 'fa-solid fa-chart-pie'}"></i>
+                        </div>
+                        <span>${item.label}</span>
+                    </a>
+                `;
+                container.appendChild(li);
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            renderVault();
+            buildSidebarMenu();
+        });
+    </script>
+</body>
+</html>

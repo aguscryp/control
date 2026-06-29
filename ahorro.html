@@ -112,13 +112,22 @@
             border-color: rgba(255, 255, 255, 0.08);
         }
 
+        /* --- CROMÁTICA NEÓN NATIVA SIK --- */
         .sidebar-icon-wrap {
             width: 32px; height: 32px; border-radius: 8px;
             display: flex; align-items: center; justify-content: center; font-size: 13px;
         }
-        .ic-vault { background: linear-gradient(135deg, #1d4ed8, #1e3a8a); color: #60a5fa; }
-        .ic-chart { background: linear-gradient(135deg, #004757, #001f26); color: #64d2ff; }
-        .ic-config { background: linear-gradient(135deg, #2c2c2e, #121214); color: #8e8e93; }
+        .ic-chart   { background: linear-gradient(135deg, #004757, #001f26); color: #64d2ff; }
+        .ic-wallet  { background: linear-gradient(135deg, #0b4622, #031409); color: #30d158; }
+        .ic-users   { background: linear-gradient(135deg, #441461, #1b052b); color: #bf5af2; }
+        .ic-target  { background: linear-gradient(135deg, #521616, #210505); color: #ff453a; }
+        .ic-cal     { background: linear-gradient(135deg, #523400, #241600); color: #ff9f0a; }
+        .ic-msg     { background: linear-gradient(135deg, #0a3361, #031429); color: #0a84ff; }
+        .ic-shield  { background: linear-gradient(135deg, #404043, #1c1c1e); color: #e5e5ea; }
+        .ic-bolt    { background: linear-gradient(135deg, #4d4400, #211d00); color: #ffd60a; }
+        .ic-folder  { background: linear-gradient(135deg, #422a14, #1f1205); color: #f5a623; }
+        .ic-config  { background: linear-gradient(135deg, #2c2c2e, #121214); color: #8e8e93; }
+        .ic-vault   { background: linear-gradient(135deg, #1d4ed8, #1e3a8a); color: #60a5fa; }
 
         .sidebar-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -445,6 +454,11 @@
         function buildSidebarMenu() {
             const defaultCoreMenu = [
                 { label: "Dashboard", link: "org.html", iconClass: "ic-chart", iconText: "fa-solid fa-chart-pie", active: true },
+                { label: "Control Central", link: "control.html", iconClass: "ic-bolt", iconText: "fa-solid fa-bolt", active: true },
+                { label: "Prospectos", link: "prospectos.html", iconClass: "ic-users", iconText: "fa-solid fa-user-group", active: true },
+                { label: "Deudas", link: "deudas.html", iconClass: "ic-wallet", iconText: "fa-solid fa-wallet", active: true },
+                { label: "Calendario", link: "calendar.html", iconClass: "ic-cal", iconText: "fa-solid fa-calendar-days", active: true },
+                { label: "Bloc de Notas", link: "nota.html", iconClass: "ic-folder", iconText: "fa-solid fa-folder-open", active: true },
                 { label: "Configurar Menú", link: "menu.html", iconClass: "ic-config", iconText: "fa-solid fa-sliders", active: true }
             ];
             const coreMenu = JSON.parse(localStorage.getItem('sik_menu_items_core')) || defaultCoreMenu;
